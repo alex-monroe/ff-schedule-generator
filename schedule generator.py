@@ -70,6 +70,16 @@ def main():
                 for variable in getTeamsVariablesForAllWeeks(variables, team, team2):
                     constraint.SetCoefficient(variable, 1)
 
+    # Teams do not play the same matchup 2 weeks in a row
+    for team in teams:
+        for team2 in teams:
+            for week in weeks[:-1]:
+                if team > team2:
+                    constraint = solver.RowConstraint(0, 1, "")
+                    constraint.SetCoefficient(variables[team][team2][week], 1)
+                    constraint.SetCoefficient(variables[team][team2][week+1], 1)
+
+
     print(f"Solving with {solver.SolverVersion()}")
     status = solver.Solve()
 
@@ -113,7 +123,7 @@ def printSchedule(variables):
     for w in weeks: 
         for i in teams:
             for j in teams:
-                if (i < j) and (variables[i][j][w].solution_value() > 0) : 
+                if (variables[i][j][w].solution_value() > 0) : 
                     print(f"{w}, {i}, {j}")
 
 
