@@ -3,6 +3,8 @@ from ortools.linear_solver import pywraplp
 weeks = range(13)
 teams = range(10)
 
+# Generates a 13 week schedule for a 10 team league.
+# Assumes 2 divisions, where each team plays teams in its own division twice and each team outside its division once.
 def main():
     # Create the mip solver with the SCIP backend.
     solver = pywraplp.Solver.CreateSolver("SAT")
