@@ -70,14 +70,26 @@ def main():
                 for variable in getTeamsVariablesForAllWeeks(variables, team, team2):
                     constraint.SetCoefficient(variable, 1)
 
-    # Teams do not play the same matchup 2 weeks in a row
+    # Teams do not play the same matchup in the same 4 week span
     for team in teams:
         for team2 in teams:
-            for week in weeks[:-1]:
+            for week in weeks[:-3]:
                 if team > team2:
                     constraint = solver.RowConstraint(0, 1, "")
                     constraint.SetCoefficient(variables[team][team2][week], 1)
                     constraint.SetCoefficient(variables[team][team2][week+1], 1)
+                    constraint.SetCoefficient(variables[team][team2][week+2], 1)
+                    constraint.SetCoefficient(variables[team][team2][week+3], 1)
+
+    # Try your best to not schedule out of division games for the last 2 weeks
+    # (to avoid potential rematches in week 14)
+    objective = solver.Objective()
+    for team in teams:
+        for team2 in teams:
+            if (team != team2) and ((team < 5 and team2 < 5) or (team > 4 and team2 > 4)):
+                objective.SetCoefficient(variables[team][team2][-1], 1)
+                objective.SetCoefficient(variables[team][team2][-2], 1)
+    objective.SetMaximization()
 
 
     print(f"Solving with {solver.SolverVersion()}")
