@@ -1,4 +1,5 @@
 from ortools.linear_solver import pywraplp
+import csv
 
 weeks = range(13)
 teams = range(10)
@@ -131,12 +132,16 @@ def getTeamsVariablesForAllWeeks(variables, team1, team2):
 
 
 def printSchedule(variables):
-    print("Week, Team1, Team2")
-    for w in weeks: 
-        for i in teams:
-            for j in teams:
-                if (variables[i][j][w].solution_value() > 0) : 
-                    print(f"{w}, {i}, {j}")
+    with open('schedule.csv', 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+
+        # Instead of print(), use writer.writerow()
+        writer.writerow(['Week', 'Team1', 'Team2'])
+        for w in weeks: 
+            for i in teams:
+                for j in teams:
+                  if (variables[i][j][w].solution_value() > 0) :
+                      writer.writerow([w, i, j]) 
 
 
 if __name__ == "__main__":
