@@ -1,0 +1,35 @@
+syntax = "proto3";
+package scheduler;
+
+service Scheduler {
+    rpc GenerateSchedule (ScheduleRequest) returns (ScheduleResponse) {}
+}
+
+message ScheduleRequest {
+    repeated Team league = 1;
+    repeated Division divisions = 2;
+}
+
+message Team {
+    string name = 1;
+    int64 division_id = 2;
+}
+
+message Division {
+    string name = 1;
+    int64 id = 2;
+}
+
+message ScheduleResponse {
+    repeated WeeklyMatchups matchups = 1;
+}
+
+message WeeklyMatchups {
+    repeated Matchup matchups = 1;
+}
+
+message Matchup {
+    Team team1 = 1;
+    Team team2 = 2;
+}
+
