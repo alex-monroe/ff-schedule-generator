@@ -1,1 +1,4 @@
 ortools==9.10.4067
+grpcio==1.66.1
+grpcio-tools==1.66.1
+grpcio-reflection
