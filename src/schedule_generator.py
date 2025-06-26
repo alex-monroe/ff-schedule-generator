@@ -65,7 +65,7 @@ def generate_schedule_csv(num_weeks, num_teams):
 
     # each team plays 1 game per week
     #   for each week and each team
-    #      sum of all variables inlucding that team for that week = 2
+    #      sum of all variables including that team for that week = 2
     for week in weeks:
         for team in teams:
             constraint = solver.RowConstraint(2, 2, "")
