@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import Mock
-import schedule_generator
+from src import schedule_generator
 
 class TestScheduleGenerator(unittest.TestCase):
 

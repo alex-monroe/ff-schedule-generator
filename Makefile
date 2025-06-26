@@ -4,13 +4,13 @@ install:
 	pip install -r requirements.txt
 
 build:
-	python3 -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. scheduler.proto
+	python3 -m grpc_tools.protoc -Isrc/protos --python_out=src --grpc_python_out=src src/protos/scheduler.proto
 
 run: build
-	python3 server.py
+	PYTHONPATH=. python3 src/server.py
 
 clean:
-	rm -f scheduler_pb2.py scheduler_pb2_grpc.py
+	rm -f src/scheduler_pb2.py src/scheduler_pb2_grpc.py
 
 test:
-	PYTHONPATH=. python3 test_schedule_generator.py
+	PYTHONPATH=src python3 -m unittest tests/test_schedule_generator.py

@@ -2,8 +2,8 @@ from concurrent import futures
 import grpc
 from grpc_reflection.v1alpha import reflection
 
-import scheduler_pb2
-import scheduler_pb2_grpc
+import src.scheduler_pb2 as scheduler_pb2
+import src.scheduler_pb2_grpc as scheduler_pb2_grpc
 
 class SchedulerServicer(scheduler_pb2_grpc.SchedulerServicer):
     def GenerateSchedule(self, request, context):
