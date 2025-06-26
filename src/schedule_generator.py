@@ -1,16 +1,47 @@
-from ortools.linear_solver import pywraplp
+import io
 import csv
+from ortools.linear_solver import pywraplp
 
-weeks = range(13)
-teams = range(10)
+# Returns all of the variables in variables that correspond to the given team playing in a game in the given week
+# Excludes variables representing the team playing itself
+def getTeamsVariablesForWeek(variables, team, week, weeks_param, teams_param):
+    teamsVariables = []
+    for w in weeks_param:
+        for i in teams_param:
+            for j in teams_param: 
+                if ((i == team) or (j == team)) and (i != j) and (w == week):
+                    teamsVariables.append(variables[i][j][w])
+    return teamsVariables
 
-# Generates a 13 week schedule for a 10 team league.
-# Assumes 2 divisions, where each team plays teams in its own division twice and each team outside its division once.
-def main():
+# Returns all of the variables in variables that represent team 1 playing in team 2 in any week
+def getTeamsVariablesForAllWeeks(variables, team1, team2, weeks_param, teams_param):
+    teamsVariables = []
+    for w in weeks_param:
+        for i in teams_param:
+            for j in teams_param: 
+                if ((i == team1) and (j == team2)) or ((i == team2) and (j == team1)):
+                    teamsVariables.append(variables[i][j][w])
+    return teamsVariables
+
+
+def _get_schedule_data(variables, weeks_param, teams_param):
+    schedule_data = []
+    schedule_data.append(['Week', 'Team1', 'Team2'])
+    for w in weeks_param: 
+        for i in teams_param:
+            for j in teams_param:
+                  if (variables[i][j][w].solution_value() > 0) :
+                      schedule_data.append([w, i, j]) 
+    return schedule_data
+
+def generate_schedule_csv(num_weeks, num_teams):
+    weeks = range(num_weeks)
+    teams = range(num_teams)
+
     # Create the mip solver with the SCIP backend.
     solver = pywraplp.Solver.CreateSolver("SAT")
     if not solver:
-        return
+        return "Error: Solver could not be created."
 
     infinity = solver.infinity()
 
@@ -18,13 +49,11 @@ def main():
     #    if x[i][j][w] == 1, then team i plays team j in week w
     #    if x[i][j][w] == 0, then team i does not play team j in week w
     variables = [[[0 for k in weeks] for j in teams] for i in teams]
-    for j in range(10):
-      for k in range(10):
-          for w in range(13):
+    for j in range(num_teams):
+      for k in range(num_teams):
+          for w in range(num_weeks):
               variables[j][k][w] = solver.IntVar(0, infinity, f"x[{j}][{k}][{w}]")
     
-    print("Number of variables =", solver.NumVariables())
-
     # no team plays itself
     # x[i][i][w] = 0 for each week w, for each team i
     for week in weeks:
@@ -38,7 +67,7 @@ def main():
     for week in weeks:
         for team in teams:
             constraint = solver.RowConstraint(2, 2, "")
-            for variable in getTeamsVariablesForWeek(variables, team, week):
+            for variable in getTeamsVariablesForWeek(variables, team, week, weeks, teams):
                 constraint.SetCoefficient(variable, 1)
 
     # when team 1 plays team 2 in a given week, ensure team 2 plays team 1
@@ -56,9 +85,9 @@ def main():
     #  sum( x[i][j][w] ) = 4 
     for team in teams:
         for team2 in teams:
-            if (team != team2) and ((team < 5 and team2 < 5) or (team > 4 and team2 > 4)):
+            if (team != team2) and ((team < num_teams/2 and team2 < num_teams/2) or (team >= num_teams/2 and team2 >= num_teams/2)):
                 constraint = solver.RowConstraint(4, 4, "")
-                for variable in getTeamsVariablesForAllWeeks(variables, team, team2):
+                for variable in getTeamsVariablesForAllWeeks(variables, team, team2, weeks, teams):
                     constraint.SetCoefficient(variable, 1)
 
     # Teams play out of division opponents once
@@ -66,9 +95,9 @@ def main():
     #  sum( x[i][j][w] ) = 2 
     for team in teams:
         for team2 in teams:
-            if (team != team2) and not ((team < 5 and team2 < 5) or (team > 4 and team2 > 4)):
+            if (team != team2) and not ((team < num_teams/2 and team2 < num_teams/2) or (team >= num_teams/2 and team2 >= num_teams/2)):
                 constraint = solver.RowConstraint(2, 2, "")
-                for variable in getTeamsVariablesForAllWeeks(variables, team, team2):
+                for variable in getTeamsVariablesForAllWeeks(variables, team, team2, weeks, teams):
                     constraint.SetCoefficient(variable, 1)
 
     # Teams do not play the same matchup in the same 4 week span
@@ -87,62 +116,29 @@ def main():
     objective = solver.Objective()
     for team in teams:
         for team2 in teams:
-            if (team != team2) and ((team < 5 and team2 < 5) or (team > 4 and team2 > 4)):
+            if (team != team2) and ((team < num_teams/2 and team2 < num_teams/2) or (team >= num_teams/2 and team2 >= num_teams/2)):
                 objective.SetCoefficient(variables[team][team2][-1], 1)
                 objective.SetCoefficient(variables[team][team2][-2], 1)
     objective.SetMaximization()
 
-
-    print(f"Solving with {solver.SolverVersion()}")
     status = solver.Solve()
 
     if status == pywraplp.Solver.OPTIMAL:
-        print("Solution:")
-        print("Objective value =", solver.Objective().Value())
-        printSchedule(variables)     
+        schedule_data = _get_schedule_data(variables, weeks, teams)
+        output = io.StringIO()
+        writer = csv.writer(output)
+        for row in schedule_data:
+            writer.writerow(row)
+        return output.getvalue()
     else:
-        print("The problem does not have an optimal solution.")
+        return "The problem does not have an optimal solution."
 
-    print("\nAdvanced usage:")
-    print(f"Problem solved in {solver.wall_time():d} milliseconds")
-    print(f"Problem solved in {solver.iterations():d} iterations")
-    print(f"Problem solved in {solver.nodes():d} branch-and-bound nodes")
-
-
-# Returns all of the variables in variables that correspond to the given team playing in a game in the given week
-# Excludes variables representing the team playing itself
-def getTeamsVariablesForWeek(variables, team, week):
-    teamsVariables = []
-    for w in weeks:
-        for i in teams:
-            for j in teams: 
-                if ((i == team) or (j == team)) and (i != j) and (w == week):
-                    teamsVariables.append(variables[i][j][w])
-    return teamsVariables
-
-# Returns all of the variables in variables that represent team 1 playing in team 2 in any week
-def getTeamsVariablesForAllWeeks(variables, team1, team2):
-    teamsVariables = []
-    for w in weeks:
-        for i in teams:
-            for j in teams: 
-                if ((i == team1) and (j == team2)) or ((i == team2) and (j == team1)):
-                    teamsVariables.append(variables[i][j][w])
-    return teamsVariables
-
-
-def printSchedule(variables):
-    with open('schedule.csv', 'w', newline='') as csvfile:
-        writer = csv.writer(csvfile)
-
-        # Instead of print(), use writer.writerow()
-        writer.writerow(['Week', 'Team1', 'Team2'])
-        for w in weeks: 
-            for i in teams:
-                for j in teams:
-                  if (variables[i][j][w].solution_value() > 0) :
-                      writer.writerow([w, i, j]) 
-
+def main():
+    # Default values for weeks and teams
+    default_weeks = 13
+    default_teams = 10
+    csv_output = generate_schedule_csv(default_weeks, default_teams)
+    print(csv_output)
 
 if __name__ == "__main__":
     main()
