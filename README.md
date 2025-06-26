@@ -35,3 +35,5 @@ make run
 ```
 
 The server will start on port `50051`.
+
+This README has been updated to trigger CI.
