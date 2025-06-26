@@ -27,11 +27,13 @@ def getTeamsVariablesForAllWeeks(variables, team1, team2, weeks_param, teams_par
 def _get_schedule_data(variables, weeks_param, teams_param):
     schedule_data = []
     schedule_data.append(['Week', 'Team1', 'Team2'])
-    for w in weeks_param: 
+    for w in weeks_param:
         for i in teams_param:
             for j in teams_param:
-                  if (variables[i][j][w].solution_value() > 0) :
-                      schedule_data.append([w, i, j]) 
+                # each matchup is represented twice in the solver (i vs j and
+                # j vs i).  Only record one of them in the schedule output.
+                if (i < j) and (variables[i][j][w].solution_value() > 0):
+                    schedule_data.append([w, i, j])
     return schedule_data
 
 def generate_schedule_csv(num_weeks, num_teams):
