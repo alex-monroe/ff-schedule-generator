@@ -34,4 +34,4 @@ To run the gRPC server, use the following command:
 make run
 ```
 
-The server will start on port `50051`
+The server will start on port `50051`.
