@@ -7,7 +7,7 @@ import scheduler_pb2_grpc
 
 class SchedulerServicer(scheduler_pb2_grpc.SchedulerServicer):
     def GenerateSchedule(self, request, context):
-        # Implement your scheduling logic here
+        # Implement your scheduling logic herecan
         response = scheduler_pb2.ScheduleResponse()
         # Your logic to populate response
         return response
