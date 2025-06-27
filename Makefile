@@ -18,4 +18,6 @@ test-unit:
 	PYTHONPATH=src python3 -m unittest tests/test_schedule_generator.py
 
 test-integration:
-	PYTHONPATH=src python3 -m unittest tests/test_integration_schedule_generator.py
+	PYTHONPATH=src python3 -m unittest \
+	tests/test_integration_schedule_generator.py \
+	tests/test_integration_server.py
