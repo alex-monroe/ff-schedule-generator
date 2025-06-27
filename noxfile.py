@@ -69,4 +69,11 @@ def tests(session):
 def lint(session):
     """Run flake8 code linting."""
     session.install("-r", "requirements.txt")
-    session.run("flake8", "src", "tests", "examples", "noxfile.py")
+    session.run(
+        "flake8",
+        "src",
+        "tests",
+        "examples",
+        "noxfile.py",
+        "--config=.flake8",
+    )
