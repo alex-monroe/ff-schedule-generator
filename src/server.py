@@ -18,7 +18,12 @@ class SchedulerServicer(scheduler_pb2_grpc.SchedulerServicer):
 
         response = scheduler_pb2.ScheduleResponse()
 
-        num_teams = len(request.league)
+        # Reorder teams so that all teams from the same division are contiguous
+        # in the list passed to the solver. The solver expects the first half of
+        # teams to belong to one division and the rest to another.
+        teams_sorted = sorted(list(request.league), key=lambda t: t.division_id)
+
+        num_teams = len(teams_sorted)
         if num_teams == 0:
             logger.info("No teams provided in request")
             return response
@@ -38,8 +43,10 @@ class SchedulerServicer(scheduler_pb2_grpc.SchedulerServicer):
             weekly = response.matchups.add()
             for team1_idx, team2_idx in schedule.get(week, []):
                 matchup = weekly.matchups.add()
-                matchup.team1.CopyFrom(request.league[team1_idx])
-                matchup.team2.CopyFrom(request.league[team2_idx])
+                # Map the solver indices back to the correct teams using the
+                # sorted order used when invoking the solver.
+                matchup.team1.CopyFrom(teams_sorted[team1_idx])
+                matchup.team2.CopyFrom(teams_sorted[team2_idx])
 
         logger.info(
             "Returning schedule response with %d weeks", len(response.matchups)

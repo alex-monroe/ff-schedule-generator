@@ -60,9 +60,15 @@ class TestServerIntegration(unittest.TestCase):
         stub = scheduler_pb2_grpc.SchedulerStub(channel)
 
         request = scheduler_pb2.ScheduleRequest()
-        for i in range(10):
-            team = scheduler_pb2.Team(name=f"Team {i+1}", division_id=0)
-            request.league.append(team)
+        # Create 10 teams split across two divisions but interleaved in the
+        # request to ensure the server reorders them correctly.
+        for i in range(5):
+            request.league.append(
+                scheduler_pb2.Team(name=f"Div1 Team {i+1}", division_id=1)
+            )
+            request.league.append(
+                scheduler_pb2.Team(name=f"Div0 Team {i+1}", division_id=0)
+            )
 
         response = stub.GenerateSchedule(request)
         logging.info("Received response with %d weeks", len(response.matchups))
