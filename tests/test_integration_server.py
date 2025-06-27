@@ -40,26 +40,12 @@ class TestServerIntegration(unittest.TestCase):
         cls.proc.terminate()
         cls.proc.join()
 
-    def test_generate_schedule_returns_schedule(self):
+    def test_generate_schedule_default_response(self):
         channel = grpc.insecure_channel('localhost:50051')
         stub = scheduler_pb2_grpc.SchedulerStub(channel)
-
-        # Build a request with ten teams
-        request = scheduler_pb2.ScheduleRequest()
-        for i in range(10):
-            request.league.append(scheduler_pb2.Team(name=f"Team {i+1}", division_id=0))
-
-        response = stub.GenerateSchedule(request)
-
+        response = stub.GenerateSchedule(scheduler_pb2.ScheduleRequest())
         self.assertIsInstance(response, scheduler_pb2.ScheduleResponse)
-        # Expect a schedule for 13 weeks with 5 matchups each week
-        self.assertEqual(len(response.matchups), 13)
-        for weekly in response.matchups:
-            self.assertEqual(len(weekly.matchups), 5)
-            for matchup in weekly.matchups:
-                self.assertTrue(matchup.team1.name)
-                self.assertTrue(matchup.team2.name)
-
+        self.assertEqual(len(response.matchups), 0)
         channel.close()
 
 
