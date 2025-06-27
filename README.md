@@ -4,16 +4,11 @@ This project contains a gRPC server for generating fantasy football schedules.
 
 ## Installation
 
-To install the necessary Python dependencies, run the following command:
+To install the necessary Python dependencies, run the following commands:
 
 ```bash
 pip install -r requirements.txt
-```
-
-Or, if you have `make` installed:
-
-```bash
-make install
+pip install nox
 ```
 
 ## Build
@@ -21,7 +16,7 @@ make install
 The server uses gRPC for communication, with the service interface defined in `scheduler.proto`. Before running the server, you need to compile the protobuf file to generate the Python gRPC code.
 
 ```bash
-make build
+nox -s build
 ```
 
 This will create `scheduler_pb2.py` and `scheduler_pb2_grpc.py` in the project root.
@@ -31,7 +26,7 @@ This will create `scheduler_pb2.py` and `scheduler_pb2_grpc.py` in the project r
 To run the gRPC server, use the following command:
 
 ```bash
-make run
+nox -s run
 ```
 
 The server will start on port `50051`.
@@ -57,12 +52,12 @@ response = stub.GenerateSchedule(request)
 print(response)
 ```
 
-Ensure the protobuf files are built (`make build`) so that `scheduler_pb2` and `scheduler_pb2_grpc` are available before running the snippet.
+Ensure the protobuf files are built (`nox -s build`) so that `scheduler_pb2` and `scheduler_pb2_grpc` are available before running the snippet.
 
 You can also run the example script in `examples/example_request.py` to see the
 same request in action:
 
 ```bash
-make build
+nox -s build
 python examples/example_request.py
 ```
