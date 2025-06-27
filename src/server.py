@@ -18,6 +18,17 @@ class SchedulerServicer(scheduler_pb2_grpc.SchedulerServicer):
 
         response = scheduler_pb2.ScheduleResponse()
 
+        # Determine how many unique divisions are present in the request. The
+        # service currently only supports schedules for a single division or for
+        # two divisions. Any other number of divisions is rejected.
+        division_ids = {team.division_id for team in request.league}
+        division_ids.update(div.id for div in request.divisions)
+        if len(division_ids) not in (1, 2):
+            context.abort(
+                grpc.StatusCode.INVALID_ARGUMENT,
+                "Only 1 or 2 divisions are currently supported",
+            )
+
         # Reorder teams so that all teams from the same division are contiguous
         # in the list passed to the solver. The solver expects the first half of
         # teams to belong to one division and the rest to another.
