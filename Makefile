@@ -1,5 +1,4 @@
 .PHONY: install build run clean test test-unit test-integration
-SHELL := /bin/zsh
 
 install:
 	pip install -r requirements.txt
