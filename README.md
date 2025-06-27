@@ -59,5 +59,5 @@ same request in action:
 
 ```bash
 nox -s build
-python examples/example_request.py
+PYTHONPATH=.:src python examples/example_request.py
 ```
