@@ -1,20 +1,55 @@
 from concurrent import futures
 import logging
+import csv
+import io
 import grpc
 from grpc_reflection.v1alpha import reflection
 
 import src.scheduler_pb2 as scheduler_pb2
 import src.scheduler_pb2_grpc as scheduler_pb2_grpc
+from src import schedule_generator
 
 
 logger = logging.getLogger(__name__)
 
 class SchedulerServicer(scheduler_pb2_grpc.SchedulerServicer):
     def GenerateSchedule(self, request, context):
-        logger.info("GenerateSchedule request received with %d teams", len(request.league))
+        logger.info(
+            "GenerateSchedule request received with %d teams", len(request.league)
+        )
+
         response = scheduler_pb2.ScheduleResponse()
-        # Your logic to populate response
-        logger.info("Returning schedule response with %d matchups", len(response.matchups))
+
+        num_teams = len(request.league)
+        if num_teams == 0:
+            logger.info("No teams provided in request")
+            return response
+
+        csv_output = schedule_generator.generate_schedule_csv(13, num_teams)
+
+        if csv_output.startswith("Error") or csv_output.startswith("The problem"):
+            logger.error("Schedule generation failed: %s", csv_output)
+            return response
+
+        reader = csv.reader(io.StringIO(csv_output))
+        header = next(reader, None)
+
+        schedule = {}
+        for week_str, team1_idx, team2_idx in reader:
+            week = int(week_str)
+            schedule.setdefault(week, []).append((int(team1_idx), int(team2_idx)))
+
+        for week in range(max(schedule.keys()) + 1):
+            weekly = response.matchups.add()
+            for team1_idx, team2_idx in schedule.get(week, []):
+                matchup = weekly.matchups.add()
+                matchup.team1.CopyFrom(request.league[team1_idx])
+                matchup.team2.CopyFrom(request.league[team2_idx])
+
+        logger.info(
+            "Returning schedule response with %d weeks", len(response.matchups)
+        )
+
         return response
 
 def serve():
