@@ -1,5 +1,3 @@
-import io
-import csv
 from ortools.linear_solver import pywraplp
 
 # Returns all of the variables in variables that correspond to the given team playing in a game in the given week
@@ -36,7 +34,7 @@ def _get_schedule_data(variables, weeks_param, teams_param):
                     schedule_data.append([w, i, j])
     return schedule_data
 
-def generate_schedule_csv(num_weeks, num_teams):
+def generate_schedule(num_weeks, num_teams):
     weeks = range(num_weeks)
     teams = range(num_teams)
 
@@ -127,11 +125,7 @@ def generate_schedule_csv(num_weeks, num_teams):
 
     if status == pywraplp.Solver.OPTIMAL:
         schedule_data = _get_schedule_data(variables, weeks, teams)
-        output = io.StringIO()
-        writer = csv.writer(output)
-        for row in schedule_data:
-            writer.writerow(row)
-        return output.getvalue()
+        return schedule_data
     else:
         return "The problem does not have an optimal solution."
 
@@ -139,8 +133,8 @@ def main():
     # Default values for weeks and teams
     default_weeks = 13
     default_teams = 10
-    csv_output = generate_schedule_csv(default_weeks, default_teams)
-    print(csv_output)
+    schedule_data = generate_schedule(default_weeks, default_teams)
+    print(schedule_data)
 
 if __name__ == "__main__":
     main()

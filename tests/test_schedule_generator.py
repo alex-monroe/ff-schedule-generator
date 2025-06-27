@@ -1,8 +1,6 @@
 import unittest
 from unittest.mock import Mock, patch
 from src import schedule_generator
-import csv
-import io
 
 class TestScheduleGenerator(unittest.TestCase):
 
@@ -87,7 +85,7 @@ class TestScheduleGenerator(unittest.TestCase):
         self.assertEqual(schedule_data, expected)
 
     @patch('src.schedule_generator.pywraplp.Solver')
-    def test_generate_schedule_csv_optimal_solution(self, MockSolver):
+    def test_generate_schedule_optimal_solution(self, MockSolver):
         mock_solver_instance = Mock()
         MockSolver.CreateSolver.return_value = mock_solver_instance
 
@@ -111,27 +109,33 @@ class TestScheduleGenerator(unittest.TestCase):
                 [1, 0, 1],
                 [1, 1, 0]
             ]
-            result_csv = schedule_generator.generate_schedule_csv(2, 2) # 2 weeks, 2 teams
+            result = schedule_generator.generate_schedule(2, 2)
 
-        expected_csv = "Week,Team1,Team2\r\n0,0,1\r\n0,1,0\r\n1,0,1\r\n1,1,0\r\n"
-        self.assertEqual(result_csv, expected_csv)
+        expected = [
+            ['Week', 'Team1', 'Team2'],
+            [0, 0, 1],
+            [0, 1, 0],
+            [1, 0, 1],
+            [1, 1, 0]
+        ]
+        self.assertEqual(result, expected)
 
     @patch('src.schedule_generator.pywraplp.Solver')
-    def test_generate_schedule_csv_no_optimal_solution(self, MockSolver):
+    def test_generate_schedule_no_optimal_solution(self, MockSolver):
         mock_solver_instance = Mock()
         MockSolver.CreateSolver.return_value = mock_solver_instance
 
         # Mock solver behavior for no optimal solution
         mock_solver_instance.Solve.return_value = schedule_generator.pywraplp.Solver.INFEASIBLE
 
-        result = schedule_generator.generate_schedule_csv(2, 2)
+        result = schedule_generator.generate_schedule(2, 2)
         self.assertEqual(result, "The problem does not have an optimal solution.")
 
     @patch('src.schedule_generator.pywraplp.Solver')
-    def test_generate_schedule_csv_solver_creation_failure(self, MockSolver):
+    def test_generate_schedule_solver_creation_failure(self, MockSolver):
         MockSolver.CreateSolver.return_value = None
 
-        result = schedule_generator.generate_schedule_csv(2, 2)
+        result = schedule_generator.generate_schedule(2, 2)
         self.assertEqual(result, "Error: Solver could not be created.")
 
 if __name__ == '__main__':
