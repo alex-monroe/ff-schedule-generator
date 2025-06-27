@@ -25,12 +25,22 @@ def run(session):
         "--grpc_python_out=src",
         "src/protos/scheduler.proto",
     )
-    session.run("python", "src/server.py")
+    session.run(
+        "python",
+        "src/server.py",
+        env={"PYTHONPATH": "."},
+    )
 
 @nox.session(reuse_venv=True)
 def test_unit(session):
     session.install("-r", "requirements.txt")
-    session.run("python", "-m", "unittest", "tests/test_schedule_generator.py")
+    session.run(
+        "python",
+        "-m",
+        "unittest",
+        "tests/test_schedule_generator.py",
+        env={"PYTHONPATH": "src"},
+    )
 
 @nox.session(reuse_venv=True)
 def test_integration(session):
@@ -41,6 +51,7 @@ def test_integration(session):
         "unittest",
         "tests/test_integration_schedule_generator.py",
         "tests/test_integration_server.py",
+        env={"PYTHONPATH": "src"},
     )
 
 @nox.session(reuse_venv=True)
