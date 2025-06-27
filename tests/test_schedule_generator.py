@@ -63,6 +63,29 @@ class TestScheduleGenerator(unittest.TestCase):
         expected = [['Week', 'Team1', 'Team2'], [0, 0, 1]]
         self.assertEqual(schedule_data, expected)
 
+    def test_get_schedule_data_returns_expected_rows(self):
+        weeks_param = range(2)
+        teams_param = range(3)
+        variables = [[[Mock() for _ in weeks_param] for _ in teams_param] for _ in teams_param]
+        for i in teams_param:
+            for j in teams_param:
+                for w in weeks_param:
+                    variables[i][j][w].solution_value.return_value = 0
+
+        variables[0][1][0].solution_value.return_value = 1
+        variables[1][0][0].solution_value.return_value = 1
+        variables[1][2][1].solution_value.return_value = 1
+        variables[2][1][1].solution_value.return_value = 1
+
+        schedule_data = schedule_generator._get_schedule_data(variables, weeks_param, teams_param)
+
+        expected = [
+            ['Week', 'Team1', 'Team2'],
+            [0, 0, 1],
+            [1, 1, 2],
+        ]
+        self.assertEqual(schedule_data, expected)
+
     @patch('src.schedule_generator.pywraplp.Solver')
     def test_generate_schedule_csv_optimal_solution(self, MockSolver):
         mock_solver_instance = Mock()
