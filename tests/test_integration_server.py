@@ -19,9 +19,11 @@ subprocess.check_call([
     'src/protos/scheduler.proto'
 ], cwd=ROOT_DIR)
 
-import scheduler_pb2
-import scheduler_pb2_grpc
-import server
+# These imports depend on the compiled protos, so they must come after
+# the subprocess call.
+import server  # noqa: E402 # pylint: disable=import-error
+import scheduler_pb2  # noqa: E402 # pylint: disable=import-error
+import scheduler_pb2_grpc  # noqa: E402 # pylint: disable=import-error
 
 
 def _run_server():

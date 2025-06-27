@@ -58,3 +58,8 @@ def test_integration(session):
 def tests(session):
     session.notify("test_unit")
     session.notify("test_integration")
+
+@nox.session(reuse_venv=True)
+def lint(session):
+    session.install("flake8")
+    session.run("flake8", "src", "tests")

@@ -2,6 +2,7 @@ import unittest
 import logging
 import schedule_generator
 
+
 class TestScheduleGeneratorIntegration(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -75,6 +76,7 @@ class TestScheduleGeneratorIntegration(unittest.TestCase):
                     4,
                     msg=f"Pair {pair} repeats within {diff} weeks",
                 )
+
 
 if __name__ == '__main__':
     logging.basicConfig(

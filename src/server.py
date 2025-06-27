@@ -10,11 +10,12 @@ from src import schedule_generator
 
 logger = logging.getLogger(__name__)
 
+
 class SchedulerServicer(scheduler_pb2_grpc.SchedulerServicer):
     def GenerateSchedule(self, request, context):
         logger.info(
-            "GenerateSchedule request received with %d teams", len(request.league)
-        )
+            "GenerateSchedule request received with %d teams",
+            len(request.league))
 
         response = scheduler_pb2.ScheduleResponse()
 
@@ -38,14 +39,17 @@ class SchedulerServicer(scheduler_pb2_grpc.SchedulerServicer):
             weekly = response.matchups.add()
             for team1_idx, team2_idx in schedule.get(week, []):
                 matchup = weekly.matchups.add()
-                matchup.team1.CopyFrom(request.league[team1_idx])
-                matchup.team2.CopyFrom(request.league[team2_idx])
+                team1 = request.league[team1_idx]
+                team2 = request.league[team2_idx]
+                matchup.team1.CopyFrom(team1)
+                matchup.team2.CopyFrom(team2)
 
         logger.info(
-            "Returning schedule response with %d weeks", len(response.matchups)
-        )
+            "Returning schedule response with %d weeks",
+            len(response.matchups))
 
         return response
+
 
 def serve():
     logging.basicConfig(
@@ -54,7 +58,8 @@ def serve():
     )
 
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    scheduler_pb2_grpc.add_SchedulerServicer_to_server(SchedulerServicer(), server)
+    scheduler_pb2_grpc.add_SchedulerServicer_to_server(
+        SchedulerServicer(), server)
 
     # Enable reflection
     SERVICE_NAMES = (
@@ -67,6 +72,7 @@ def serve():
     server.start()
     logger.info("Server started on port 50051 with reflection enabled")
     server.wait_for_termination()
+
 
 if __name__ == '__main__':
     serve()
