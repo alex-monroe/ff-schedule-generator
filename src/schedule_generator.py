@@ -1,7 +1,8 @@
 from ortools.linear_solver import pywraplp
 
 
-# Returns all of the variables in variables that correspond to the given team playing in a game in the given week
+# Returns all of the variables in variables that correspond to the
+# given team playing in a game in the given week
 # Excludes variables representing the team playing itself
 def getTeamsVariablesForWeek(variables, team, week, weeks_param, teams_param):
     teamsVariables = []
