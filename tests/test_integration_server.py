@@ -62,9 +62,15 @@ class TestServerIntegration(unittest.TestCase):
         stub = scheduler_pb2_grpc.SchedulerStub(channel)
 
         request = scheduler_pb2.ScheduleRequest()
-        for i in range(10):
-            team = scheduler_pb2.Team(name=f"Team {i+1}", division_id=0)
-            request.league.append(team)
+        # Create 10 teams split across two divisions but interleaved in the
+        # request to ensure the server reorders them correctly.
+        for i in range(5):
+            request.league.append(
+                scheduler_pb2.Team(name=f"Div1 Team {i+1}", division_id=1)
+            )
+            request.league.append(
+                scheduler_pb2.Team(name=f"Div0 Team {i+1}", division_id=0)
+            )
 
         response = stub.GenerateSchedule(request)
         logging.info("Received response with %d weeks", len(response.matchups))
@@ -73,6 +79,33 @@ class TestServerIntegration(unittest.TestCase):
         self.assertEqual(len(response.matchups), 13)
         for weekly in response.matchups:
             self.assertEqual(len(weekly.matchups), 5)
+
+        channel.close()
+
+    def test_generate_schedule_invalid_divisions(self):
+        """Requests with more than two divisions should return an error."""
+        logging.info("Sending invalid GenerateSchedule request to server")
+        channel = grpc.insecure_channel('localhost:50051')
+        stub = scheduler_pb2_grpc.SchedulerStub(channel)
+
+        request = scheduler_pb2.ScheduleRequest()
+        # Create teams across three divisions to trigger the validation.
+        for i in range(4):
+            request.league.append(
+                scheduler_pb2.Team(name=f"Div0 Team {i+1}", division_id=0)
+            )
+        for i in range(3):
+            request.league.append(
+                scheduler_pb2.Team(name=f"Div1 Team {i+1}", division_id=1)
+            )
+        for i in range(3):
+            request.league.append(
+                scheduler_pb2.Team(name=f"Div2 Team {i+1}", division_id=2)
+            )
+
+        with self.assertRaises(grpc.RpcError) as cm:
+            stub.GenerateSchedule(request)
+        self.assertEqual(cm.exception.code(), grpc.StatusCode.INVALID_ARGUMENT)
 
         channel.close()
 

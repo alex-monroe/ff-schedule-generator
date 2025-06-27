@@ -19,7 +19,23 @@ class SchedulerServicer(scheduler_pb2_grpc.SchedulerServicer):
 
         response = scheduler_pb2.ScheduleResponse()
 
-        num_teams = len(request.league)
+        # Determine how many unique divisions are present in the request. The
+        # service currently only supports schedules for a single division or for
+        # two divisions. Any other number of divisions is rejected.
+        division_ids = {team.division_id for team in request.league}
+        division_ids.update(div.id for div in request.divisions)
+        if len(division_ids) not in (1, 2):
+            context.abort(
+                grpc.StatusCode.INVALID_ARGUMENT,
+                "Only 1 or 2 divisions are currently supported",
+            )
+
+        # Reorder teams so that all teams from the same division are contiguous
+        # in the list passed to the solver. The solver expects the first half of
+        # teams to belong to one division and the rest to another.
+        teams_sorted = sorted(list(request.league), key=lambda t: t.division_id)
+
+        num_teams = len(teams_sorted)
         if num_teams == 0:
             logger.info("No teams provided in request")
             return response
@@ -39,10 +55,10 @@ class SchedulerServicer(scheduler_pb2_grpc.SchedulerServicer):
             weekly = response.matchups.add()
             for team1_idx, team2_idx in schedule.get(week, []):
                 matchup = weekly.matchups.add()
-                team1 = request.league[team1_idx]
-                team2 = request.league[team2_idx]
-                matchup.team1.CopyFrom(team1)
-                matchup.team2.CopyFrom(team2)
+                # Map the solver indices back to the correct teams using the
+                # sorted order used when invoking the solver.
+                matchup.team1.CopyFrom(teams_sorted[team1_idx])
+                matchup.team2.CopyFrom(teams_sorted[team2_idx])
 
         logger.info(
             "Returning schedule response with %d weeks",
