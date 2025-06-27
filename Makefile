@@ -11,6 +11,8 @@ run: build
 
 clean:
 	rm -f src/scheduler_pb2.py src/scheduler_pb2_grpc.py
+	find . -name __pycache__ -type d -exec rm -rf {} +
+
 
 test: test-unit test-integration
 
