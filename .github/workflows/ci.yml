@@ -26,6 +26,9 @@ jobs:
           pip install -r requirements.txt
           pip install nox
 
+      - name: Run lint
+        run: nox -s lint
+
       - name: Run unit tests
         run: nox -s test_unit
 

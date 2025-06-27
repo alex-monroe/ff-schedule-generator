@@ -2,6 +2,7 @@ import unittest
 import logging
 import schedule_generator
 
+
 class TestScheduleGeneratorIntegration(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -11,7 +12,7 @@ class TestScheduleGeneratorIntegration(unittest.TestCase):
 
         logging.basicConfig(
             level=logging.INFO,
-            format='[%(asctime)s] %(levelname)s %(name)s: %(message)s',
+            format="[%(asctime)s] %(levelname)s %(name)s: %(message)s",
         )
         logging.info(
             "Calling generate_schedule with %d weeks and %d teams",
@@ -19,13 +20,9 @@ class TestScheduleGeneratorIntegration(unittest.TestCase):
             cls.num_teams,
         )
 
-        cls.schedule_data = schedule_generator.generate_schedule(
-            cls.num_weeks, cls.num_teams
-        )
+        cls.schedule_data = schedule_generator.generate_schedule(cls.num_weeks, cls.num_teams)
 
-        logging.info(
-            "generate_schedule returned %d rows", len(cls.schedule_data)
-        )
+        logging.info("generate_schedule returned %d rows", len(cls.schedule_data))
 
     def test_generate_schedule_real_solver(self):
         """Basic sanity checks on the solver output."""
@@ -76,9 +73,10 @@ class TestScheduleGeneratorIntegration(unittest.TestCase):
                     msg=f"Pair {pair} repeats within {diff} weeks",
                 )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     logging.basicConfig(
         level=logging.INFO,
-        format='[%(asctime)s] %(levelname)s %(name)s: %(message)s',
+        format="[%(asctime)s] %(levelname)s %(name)s: %(message)s",
     )
     unittest.main()

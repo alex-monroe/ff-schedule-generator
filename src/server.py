@@ -10,11 +10,10 @@ from src import schedule_generator
 
 logger = logging.getLogger(__name__)
 
+
 class SchedulerServicer(scheduler_pb2_grpc.SchedulerServicer):
     def GenerateSchedule(self, request, context):
-        logger.info(
-            "GenerateSchedule request received with %d teams", len(request.league)
-        )
+        logger.info("GenerateSchedule request received with %d teams", len(request.league))
 
         response = scheduler_pb2.ScheduleResponse()
 
@@ -59,16 +58,15 @@ class SchedulerServicer(scheduler_pb2_grpc.SchedulerServicer):
                 matchup.team1.CopyFrom(teams_sorted[team1_idx])
                 matchup.team2.CopyFrom(teams_sorted[team2_idx])
 
-        logger.info(
-            "Returning schedule response with %d weeks", len(response.matchups)
-        )
+        logger.info("Returning schedule response with %d weeks", len(response.matchups))
 
         return response
+
 
 def serve():
     logging.basicConfig(
         level=logging.INFO,
-        format='[%(asctime)s] %(levelname)s %(name)s: %(message)s',
+        format="[%(asctime)s] %(levelname)s %(name)s: %(message)s",
     )
 
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
@@ -76,15 +74,16 @@ def serve():
 
     # Enable reflection
     SERVICE_NAMES = (
-        scheduler_pb2.DESCRIPTOR.services_by_name['Scheduler'].full_name,
+        scheduler_pb2.DESCRIPTOR.services_by_name["Scheduler"].full_name,
         reflection.SERVICE_NAME,
     )
     reflection.enable_server_reflection(SERVICE_NAMES, server)
 
-    server.add_insecure_port('[::]:50051')
+    server.add_insecure_port("[::]:50051")
     server.start()
     logger.info("Server started on port 50051 with reflection enabled")
     server.wait_for_termination()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     serve()
