@@ -1,5 +1,6 @@
 import nox
 
+
 @nox.session(reuse_venv=True)
 def build(session):
     session.install("grpcio-tools")
@@ -12,6 +13,7 @@ def build(session):
         "--grpc_python_out=src",
         "src/protos/scheduler.proto",
     )
+
 
 @nox.session(reuse_venv=True)
 def run(session):
@@ -31,6 +33,7 @@ def run(session):
         env={"PYTHONPATH": "."},
     )
 
+
 @nox.session(reuse_venv=True)
 def test_unit(session):
     session.install("-r", "requirements.txt")
@@ -41,6 +44,7 @@ def test_unit(session):
         "tests/test_schedule_generator.py",
         env={"PYTHONPATH": "src"},
     )
+
 
 @nox.session(reuse_venv=True)
 def test_integration(session):
@@ -54,7 +58,22 @@ def test_integration(session):
         env={"PYTHONPATH": "src"},
     )
 
+
 @nox.session(reuse_venv=True)
 def tests(session):
     session.notify("test_unit")
     session.notify("test_integration")
+
+
+@nox.session(reuse_venv=True)
+def lint(session):
+    """Run flake8 code linting."""
+    session.install("-r", "requirements.txt")
+    session.run(
+        "flake8",
+        "src",
+        "tests",
+        "examples",
+        "noxfile.py",
+        "--config=.flake8",
+    )

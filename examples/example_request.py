@@ -1,12 +1,6 @@
-import sys
-from pathlib import Path
-
-# Ensure the generated gRPC modules are on the path
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
-
 import grpc
-import scheduler_pb2
-import scheduler_pb2_grpc
+from src import scheduler_pb2
+from src import scheduler_pb2_grpc
 
 
 def build_request(num_teams: int) -> scheduler_pb2.ScheduleRequest:
@@ -14,12 +8,8 @@ def build_request(num_teams: int) -> scheduler_pb2.ScheduleRequest:
     # Alternate teams between two divisions so ordering does not already match
     # the solver's expected grouping.
     for i in range(num_teams // 2):
-        request.league.append(
-            scheduler_pb2.Team(name=f"Division 0 Team {i+1}", division_id=0)
-        )
-        request.league.append(
-            scheduler_pb2.Team(name=f"Division 1 Team {i+1}", division_id=1)
-        )
+        request.league.append(scheduler_pb2.Team(name=f"Division 0 Team {i+1}", division_id=0))
+        request.league.append(scheduler_pb2.Team(name=f"Division 1 Team {i+1}", division_id=1))
     return request
 
 
@@ -38,4 +28,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

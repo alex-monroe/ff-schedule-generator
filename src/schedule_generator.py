@@ -1,22 +1,25 @@
 from ortools.linear_solver import pywraplp
 
-# Returns all of the variables in variables that correspond to the given team playing in a game in the given week
+
+# Returns all of the variables in variables that correspond to the
+# given team playing in a game in the given week
 # Excludes variables representing the team playing itself
 def getTeamsVariablesForWeek(variables, team, week, weeks_param, teams_param):
     teamsVariables = []
     for w in weeks_param:
         for i in teams_param:
-            for j in teams_param: 
+            for j in teams_param:
                 if ((i == team) or (j == team)) and (i != j) and (w == week):
                     teamsVariables.append(variables[i][j][w])
     return teamsVariables
+
 
 # Returns all of the variables in variables that represent team 1 playing in team 2 in any week
 def getTeamsVariablesForAllWeeks(variables, team1, team2, weeks_param, teams_param):
     teamsVariables = []
     for w in weeks_param:
         for i in teams_param:
-            for j in teams_param: 
+            for j in teams_param:
                 if ((i == team1) and (j == team2)) or ((i == team2) and (j == team1)):
                     teamsVariables.append(variables[i][j][w])
     return teamsVariables
@@ -24,7 +27,7 @@ def getTeamsVariablesForAllWeeks(variables, team1, team2, weeks_param, teams_par
 
 def _get_schedule_data(variables, weeks_param, teams_param):
     schedule_data = []
-    schedule_data.append(['Week', 'Team1', 'Team2'])
+    schedule_data.append(["Week", "Team1", "Team2"])
     for w in weeks_param:
         for i in teams_param:
             for j in teams_param:
@@ -33,6 +36,7 @@ def _get_schedule_data(variables, weeks_param, teams_param):
                 if (i < j) and (variables[i][j][w].solution_value() > 0):
                     schedule_data.append([w, i, j])
     return schedule_data
+
 
 def generate_schedule(num_weeks, num_teams):
     weeks = range(num_weeks)
@@ -50,10 +54,10 @@ def generate_schedule(num_weeks, num_teams):
     #    if x[i][j][w] == 0, then team i does not play team j in week w
     variables = [[[0 for k in weeks] for j in teams] for i in teams]
     for j in range(num_teams):
-      for k in range(num_teams):
-          for w in range(num_weeks):
-              variables[j][k][w] = solver.IntVar(0, infinity, f"x[{j}][{k}][{w}]")
-    
+        for k in range(num_teams):
+            for w in range(num_weeks):
+                variables[j][k][w] = solver.IntVar(0, infinity, f"x[{j}][{k}][{w}]")
+
     # no team plays itself
     # x[i][i][w] = 0 for each week w, for each team i
     for week in weeks:
@@ -75,27 +79,33 @@ def generate_schedule(num_weeks, num_teams):
     for team in teams:
         for team2 in teams:
             if team > team2:
-              for week in weeks:
-                  constraint = solver.RowConstraint(0, 0, "")
-                  constraint.SetCoefficient(variables[team][team2][week], 1)
-                  constraint.SetCoefficient(variables[team2][team][week], -1)
-    
+                for week in weeks:
+                    constraint = solver.RowConstraint(0, 0, "")
+                    constraint.SetCoefficient(variables[team][team2][week], 1)
+                    constraint.SetCoefficient(variables[team2][team][week], -1)
+
     # Teams within the division play each other twice
     # for each team combination in each division, for all weeks
-    #  sum( x[i][j][w] ) = 4 
+    #  sum( x[i][j][w] ) = 4
     for team in teams:
         for team2 in teams:
-            if (team != team2) and ((team < num_teams/2 and team2 < num_teams/2) or (team >= num_teams/2 and team2 >= num_teams/2)):
+            if (team != team2) and (
+                (team < num_teams / 2 and team2 < num_teams / 2)
+                or (team >= num_teams / 2 and team2 >= num_teams / 2)
+            ):
                 constraint = solver.RowConstraint(4, 4, "")
                 for variable in getTeamsVariablesForAllWeeks(variables, team, team2, weeks, teams):
                     constraint.SetCoefficient(variable, 1)
 
     # Teams play out of division opponents once
     # for each team combination outside each division, for all weeks
-    #  sum( x[i][j][w] ) = 2 
+    #  sum( x[i][j][w] ) = 2
     for team in teams:
         for team2 in teams:
-            if (team != team2) and not ((team < num_teams/2 and team2 < num_teams/2) or (team >= num_teams/2 and team2 >= num_teams/2)):
+            if (team != team2) and not (
+                (team < num_teams / 2 and team2 < num_teams / 2)
+                or (team >= num_teams / 2 and team2 >= num_teams / 2)
+            ):
                 constraint = solver.RowConstraint(2, 2, "")
                 for variable in getTeamsVariablesForAllWeeks(variables, team, team2, weeks, teams):
                     constraint.SetCoefficient(variable, 1)
@@ -107,16 +117,19 @@ def generate_schedule(num_weeks, num_teams):
                 if team > team2:
                     constraint = solver.RowConstraint(0, 1, "")
                     constraint.SetCoefficient(variables[team][team2][week], 1)
-                    constraint.SetCoefficient(variables[team][team2][week+1], 1)
-                    constraint.SetCoefficient(variables[team][team2][week+2], 1)
-                    constraint.SetCoefficient(variables[team][team2][week+3], 1)
+                    constraint.SetCoefficient(variables[team][team2][week + 1], 1)
+                    constraint.SetCoefficient(variables[team][team2][week + 2], 1)
+                    constraint.SetCoefficient(variables[team][team2][week + 3], 1)
 
     # Try your best to not schedule out of division games for the last 2 weeks
     # (to avoid potential rematches in week 14)
     objective = solver.Objective()
     for team in teams:
         for team2 in teams:
-            if (team != team2) and ((team < num_teams/2 and team2 < num_teams/2) or (team >= num_teams/2 and team2 >= num_teams/2)):
+            if (team != team2) and (
+                (team < num_teams / 2 and team2 < num_teams / 2)
+                or (team >= num_teams / 2 and team2 >= num_teams / 2)
+            ):
                 objective.SetCoefficient(variables[team][team2][-1], 1)
                 objective.SetCoefficient(variables[team][team2][-2], 1)
     objective.SetMaximization()
@@ -129,12 +142,14 @@ def generate_schedule(num_weeks, num_teams):
     else:
         return "The problem does not have an optimal solution."
 
+
 def main():
     # Default values for weeks and teams
     default_weeks = 13
     default_teams = 10
     schedule_data = generate_schedule(default_weeks, default_teams)
     print(schedule_data)
+
 
 if __name__ == "__main__":
     main()

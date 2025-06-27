@@ -2,3 +2,5 @@ ortools==9.14.6206
 grpcio==1.73.1
 grpcio-tools==1.73.1
 grpcio-reflection==1.73.1
+flake8==7.0.0
+black==24.4.2
