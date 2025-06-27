@@ -22,13 +22,15 @@ jobs:
           python-version: '3.x'
 
       - name: Install dependencies
-        run: make install
+        run: |
+          pip install -r requirements.txt
+          pip install nox
 
       - name: Run unit tests
-        run: make test-unit
+        run: nox -s test_unit
 
       - name: Run integration tests
-        run: make test-integration
+        run: nox -s test_integration
 
       - name: Build server
-        run: make build
+        run: nox -s build
