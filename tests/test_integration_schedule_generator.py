@@ -1,5 +1,5 @@
 import unittest
-from src import schedule_generator
+import schedule_generator
 
 class TestScheduleGeneratorIntegration(unittest.TestCase):
     def test_generate_schedule_csv_real_solver(self):
