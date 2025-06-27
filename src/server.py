@@ -16,7 +16,7 @@ class SchedulerServicer(scheduler_pb2_grpc.SchedulerServicer):
         if num_teams == 0:
             return scheduler_pb2.ScheduleResponse()
 
-        csv_output = schedule_generator.generate_schedule_csv(DEFAULT_WEEK_COUNT, num_teams)
+        csv_output = schedule_generator.generate_schedule_csv(13, num_teams)
         lines = csv_output.strip().splitlines()
 
         # Mapping from team index in the solver output to the Team message from
