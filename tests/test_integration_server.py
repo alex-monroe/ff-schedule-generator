@@ -5,35 +5,36 @@ import unittest
 import subprocess
 from multiprocessing import Process
 import logging
+import importlib
 
 import grpc
 
-# Compile protobuf definitions before importing the server
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-subprocess.check_call(
-    [
-        sys.executable,
-        "-m",
-        "grpc_tools.protoc",
-        "-Isrc/protos",
-        "--python_out=src",
-        "--grpc_python_out=src",
-        "src/protos/scheduler.proto",
-    ],
-    cwd=ROOT_DIR,
-)
-
-import scheduler_pb2
-import scheduler_pb2_grpc
-import server
 
 
-def _run_server():
+def _compile_protos() -> None:
+    """Compile protobuf definitions for the tests."""
+    subprocess.check_call(
+        [
+            sys.executable,
+            "-m",
+            "grpc_tools.protoc",
+            "-Isrc/protos",
+            "--python_out=src",
+            "--grpc_python_out=src",
+            "src/protos/scheduler.proto",
+        ],
+        cwd=ROOT_DIR,
+    )
+
+
+def _run_server() -> None:
     logging.basicConfig(
         level=logging.INFO,
         format="[%(asctime)s] %(levelname)s %(name)s: %(message)s",
     )
     logging.info("Starting server in subprocess for integration test")
+    server = importlib.import_module("server")
     server.serve()
 
 
@@ -44,6 +45,10 @@ class TestServerIntegration(unittest.TestCase):
             level=logging.INFO,
             format="[%(asctime)s] %(levelname)s %(name)s: %(message)s",
         )
+        _compile_protos()
+        global scheduler_pb2, scheduler_pb2_grpc
+        scheduler_pb2 = importlib.import_module("scheduler_pb2")
+        scheduler_pb2_grpc = importlib.import_module("scheduler_pb2_grpc")
         logging.info("Launching gRPC server process for integration test")
         cls.proc = Process(target=_run_server)
         cls.proc.start()

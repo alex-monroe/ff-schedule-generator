@@ -1,12 +1,6 @@
-import sys
-from pathlib import Path
-
-# Ensure the generated gRPC modules are on the path
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
-
 import grpc
-import scheduler_pb2
-import scheduler_pb2_grpc
+from src import scheduler_pb2
+from src import scheduler_pb2_grpc
 
 
 def build_request(num_teams: int) -> scheduler_pb2.ScheduleRequest:
