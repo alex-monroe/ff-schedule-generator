@@ -1,4 +1,5 @@
 .PHONY: install build run clean test test-unit test-integration
+SHELL := /bin/zsh
 
 install:
 	pip install -r requirements.txt
@@ -20,6 +21,5 @@ test-unit:
 	PYTHONPATH=src python3 -m unittest tests/test_schedule_generator.py
 
 test-integration:
-	PYTHONPATH=src python3 -m unittest \
-	tests/test_integration_schedule_generator.py \
-	tests/test_integration_server.py
+	PYTHONPATH=src python3 -m unittest tests/test_integration_schedule_generator.py
+	PYTHONPATH=src python3 -m unittest tests/test_integration_server.py
