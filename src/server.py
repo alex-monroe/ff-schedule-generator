@@ -1,7 +1,5 @@
 from concurrent import futures
 import logging
-import csv
-import io
 import grpc
 from grpc_reflection.v1alpha import reflection
 
@@ -25,17 +23,14 @@ class SchedulerServicer(scheduler_pb2_grpc.SchedulerServicer):
             logger.info("No teams provided in request")
             return response
 
-        csv_output = schedule_generator.generate_schedule_csv(13, num_teams)
+        schedule_data = schedule_generator.generate_schedule(13, num_teams)
 
-        if csv_output.startswith("Error") or csv_output.startswith("The problem"):
-            logger.error("Schedule generation failed: %s", csv_output)
+        if isinstance(schedule_data, str):
+            logger.error("Schedule generation failed: %s", schedule_data)
             return response
 
-        reader = csv.reader(io.StringIO(csv_output))
-        header = next(reader, None)
-
         schedule = {}
-        for week_str, team1_idx, team2_idx in reader:
+        for week_str, team1_idx, team2_idx in schedule_data[1:]:
             week = int(week_str)
             schedule.setdefault(week, []).append((int(team1_idx), int(team2_idx)))
 
