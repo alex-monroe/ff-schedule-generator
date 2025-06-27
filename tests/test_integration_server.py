@@ -54,14 +54,27 @@ class TestServerIntegration(unittest.TestCase):
         cls.proc.join()
         logging.info("Server process terminated")
 
-    def test_generate_schedule_default_response(self):
+    def test_generate_schedule_generates_matchups(self):
         logging.info("Sending GenerateSchedule request to server")
-        channel = grpc.insecure_channel('localhost:50051')
+        channel = grpc.insecure_channel("localhost:50051")
         stub = scheduler_pb2_grpc.SchedulerStub(channel)
-        response = stub.GenerateSchedule(scheduler_pb2.ScheduleRequest())
-        logging.info("Received response with %d matchups", len(response.matchups))
+
+        request = scheduler_pb2.ScheduleRequest()
+        for i in range(10):
+            request.league.append(
+                scheduler_pb2.Team(name=f"Team {i}", division_id=0)
+            )
+
+        response = stub.GenerateSchedule(request)
+        logging.info(
+            "Received response with %d weeks", len(response.matchups)
+        )
+
         self.assertIsInstance(response, scheduler_pb2.ScheduleResponse)
-        self.assertEqual(len(response.matchups), 0)
+        self.assertEqual(len(response.matchups), 13)
+        for weekly in response.matchups:
+            self.assertEqual(len(weekly.matchups), 5)
+
         channel.close()
 
 
