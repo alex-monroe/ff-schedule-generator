@@ -24,16 +24,19 @@ class SchedulerServicer(scheduler_pb2_grpc.SchedulerServicer):
         teams = list(request.league)
 
         weekly = {}
-        reader = csv.DictReader(lines)
-        for row in reader:
-            week = int(row["Week"])
-            t1 = teams[int(row["Team1"])]
-            t2 = teams[int(row["Team2"])]
+        try:
+            reader = csv.DictReader(lines)
+            for row in reader:
+                week = int(row["Week"])
+                t1 = teams[int(row["Team1"])]
+                t2 = teams[int(row["Team2"])]
 
-            weekly.setdefault(week, scheduler_pb2.WeeklyMatchups())
-            weekly[week].matchups.append(
-                scheduler_pb2.Matchup(team1=t1, team2=t2)
-            )
+                weekly.setdefault(week, scheduler_pb2.WeeklyMatchups())
+                weekly[week].matchups.append(
+                    scheduler_pb2.Matchup(team1=t1, team2=t2)
+                )
+        except (csv.Error, KeyError, ValueError) as e:
+            context.abort(grpc.StatusCode.INVALID_ARGUMENT, f"Malformed CSV data: {e}")
 
         response = scheduler_pb2.ScheduleResponse()
         for week in sorted(weekly.keys()):
