@@ -20,4 +20,6 @@ jobs:
       - name: Compile protos
         run: python compile_protos.py
       - name: Run example request
-        run: PYTHONPATH=.:src python examples/example_request_https.py https://ff-scheduler-466320.uw.r.appspot.com
+        env:
+          EXAMPLE_REQUEST_URL: https://ff-scheduler-466320.uw.r.appspot.com
+        run: PYTHONPATH=.:src python examples/example_request_https.py $EXAMPLE_REQUEST_URL
