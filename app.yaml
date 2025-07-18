@@ -1,4 +1,4 @@
-service: schedule-generator
+service: default
 runtime: custom
 env: flex
 instance_class: F2
