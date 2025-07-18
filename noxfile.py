@@ -4,29 +4,13 @@ import nox
 @nox.session(reuse_venv=True)
 def build(session):
     session.install("grpcio-tools")
-    session.run(
-        "python",
-        "-m",
-        "grpc_tools.protoc",
-        "-Isrc/protos",
-        "--python_out=src",
-        "--grpc_python_out=src",
-        "src/protos/scheduler.proto",
-    )
+    session.run("python", "compile_protos.py")
 
 
 @nox.session(reuse_venv=True)
 def run(session):
     session.install("-r", "requirements.txt")
-    session.run(
-        "python",
-        "-m",
-        "grpc_tools.protoc",
-        "-Isrc/protos",
-        "--python_out=src",
-        "--grpc_python_out=src",
-        "src/protos/scheduler.proto",
-    )
+    session.run("python", "compile_protos.py")
     session.run(
         "python",
         "src/server.py",

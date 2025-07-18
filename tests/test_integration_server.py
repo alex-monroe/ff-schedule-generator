@@ -14,18 +14,10 @@ ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
 def _compile_protos() -> None:
     """Compile protobuf definitions for the tests."""
-    subprocess.check_call(
-        [
-            sys.executable,
-            "-m",
-            "grpc_tools.protoc",
-            "-Isrc/protos",
-            "--python_out=src",
-            "--grpc_python_out=src",
-            "src/protos/scheduler.proto",
-        ],
-        cwd=ROOT_DIR,
-    )
+    subprocess.check_call([
+        sys.executable,
+        "compile_protos.py",
+    ], cwd=ROOT_DIR)
 
 
 def _run_server() -> None:

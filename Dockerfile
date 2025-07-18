@@ -10,7 +10,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY src ./src
 
 # Compile protobufs
-RUN python -m grpc_tools.protoc -Isrc/protos --python_out=src --grpc_python_out=src src/protos/scheduler.proto
+COPY compile_protos.py ./
+RUN python compile_protos.py
 
 # Set PYTHONPATH so the server can find the generated modules
 ENV PYTHONPATH=/app

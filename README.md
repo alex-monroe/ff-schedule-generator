@@ -13,13 +13,13 @@ pip install nox
 
 ## Build
 
-The server uses gRPC for communication, with the service interface defined in `scheduler.proto`. Before running the server, you need to compile the protobuf file to generate the Python gRPC code.
+The server uses gRPC for communication. All protobuf definitions in `src/protos` must be compiled before the server can run. A helper script `compile_protos.py` handles this for every `.proto` file found in that directory.
 
 ```bash
 nox -s build
 ```
 
-This will create `scheduler_pb2.py` and `scheduler_pb2_grpc.py` in the project root.
+This will create the generated `_pb2.py` files next to your source code. You can also run `python compile_protos.py` directly if you prefer not to use Nox.
 
 ## Running the Server
 
@@ -74,3 +74,4 @@ docker run -p 50051:50051 schedule-server
 ```
 
 The image compiles the protobuf definitions during build and starts the gRPC server on port `50051`.
+The `compile_protos.py` script is copied into the image so that any new `.proto` files will be included automatically.
