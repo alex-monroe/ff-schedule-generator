@@ -11,6 +11,7 @@ import grpc
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 DOCKER_IMAGE = "schedule-server:test"
+CONTAINER_NAME = "schedule-server-test"
 
 
 def _compile_protos() -> None:
@@ -22,7 +23,20 @@ def _compile_protos() -> None:
 
 
 def _build_image() -> None:
-    """Build the Docker image for the server used in tests."""
+    """Build the Docker image for the server used in tests if needed."""
+    try:
+        subprocess.check_call(
+            ["docker", "image", "inspect", DOCKER_IMAGE],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            cwd=ROOT_DIR,
+        )
+        logging.info("Docker image %s already present", DOCKER_IMAGE)
+        return
+    except subprocess.CalledProcessError:
+        pass
+
+    logging.info("Building Docker image %s", DOCKER_IMAGE)
     subprocess.check_call([
         "docker",
         "build",
@@ -37,6 +51,8 @@ def _run_container() -> subprocess.Popen:
     return subprocess.Popen([
         "docker",
         "run",
+        "--name",
+        CONTAINER_NAME,
         "-p",
         "50051:50051",
         "--rm",
@@ -67,9 +83,19 @@ class TestServerIntegration(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        logging.info("Terminating gRPC server container")
-        cls.proc.terminate()
-        cls.proc.wait()
+        logging.info("Stopping gRPC server container")
+        subprocess.run(
+            ["docker", "stop", CONTAINER_NAME],
+            cwd=ROOT_DIR,
+            check=False,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        try:
+            cls.proc.wait(timeout=10)
+        except subprocess.TimeoutExpired:
+            cls.proc.kill()
+            cls.proc.wait()
         logging.info("Server container terminated")
 
     def test_generate_schedule_returns_matchups(self):
