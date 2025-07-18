@@ -1,3 +1,4 @@
+import argparse
 import grpc
 from src import scheduler_pb2
 from src import scheduler_pb2_grpc
@@ -13,8 +14,10 @@ def build_request(num_teams: int) -> scheduler_pb2.ScheduleRequest:
     return request
 
 
-def main() -> None:
-    channel = grpc.insecure_channel("localhost:50051")
+def main(host: str = "localhost") -> None:
+    """Send an example schedule request to the server."""
+
+    channel = grpc.insecure_channel(f"{host}:50051")
     stub = scheduler_pb2_grpc.SchedulerStub(channel)
 
     request = build_request(10)
@@ -27,4 +30,12 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Send an example ScheduleRequest")
+    parser.add_argument(
+        "host",
+        nargs="?",
+        default="localhost",
+        help="IP or hostname of the running gRPC server (default: localhost)",
+    )
+    args = parser.parse_args()
+    main(args.host)

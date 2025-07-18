@@ -40,7 +40,8 @@ import grpc
 import scheduler_pb2
 import scheduler_pb2_grpc
 
-channel = grpc.insecure_channel('localhost:50051')
+host = 'localhost'  # replace with your server's IP to test remotely
+channel = grpc.insecure_channel(f'{host}:50051')
 stub = scheduler_pb2_grpc.SchedulerStub(channel)
 
 request = scheduler_pb2.ScheduleRequest()
@@ -55,11 +56,11 @@ print(response)
 Ensure the protobuf files are built (`nox -s build`) so that `scheduler_pb2` and `scheduler_pb2_grpc` are available before running the snippet.
 
 You can also run the example script in `examples/example_request.py` to see the
-same request in action:
+same request in action. Pass the server IP if it is not running locally:
 
 ```bash
 nox -s build
-PYTHONPATH=.:src python examples/example_request.py
+PYTHONPATH=.:src python examples/example_request.py 192.168.1.50
 ```
 
 ## Docker
