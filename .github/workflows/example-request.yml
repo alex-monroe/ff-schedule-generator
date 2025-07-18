@@ -1,0 +1,25 @@
+name: Example Request
+
+on:
+  workflow_dispatch:
+
+jobs:
+  run-example:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install grpcio-tools
+      - name: Compile protos
+        run: python compile_protos.py
+      - name: Run example request
+        env:
+          EXAMPLE_REQUEST_URL: https://ff-scheduler-466320.uw.r.appspot.com
+        run: PYTHONPATH=.:src python examples/example_request_https.py $EXAMPLE_REQUEST_URL
