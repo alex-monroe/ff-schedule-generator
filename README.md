@@ -61,3 +61,14 @@ same request in action:
 nox -s build
 PYTHONPATH=.:src python examples/example_request.py
 ```
+
+## Docker
+
+A `Dockerfile` is provided for building the server into a container image. Build the image and run it locally with:
+
+```bash
+docker build -t schedule-server .
+docker run -p 50051:50051 schedule-server
+```
+
+The image compiles the protobuf definitions during build and starts the gRPC server on port `50051`.
