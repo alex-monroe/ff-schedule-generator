@@ -1,2 +1,13 @@
 runtime: custom
 env: flex
+service: scheduler
+instance_class: F2
+automatic_scaling:
+  min_num_instances: 1
+  max_num_instances: 2
+  cool_down_period_sec: 180
+  cpu_utilization:
+    target_utilization: 0.6
+env_variables:
+  PORT: "50051"
+  LOG_LEVEL: "INFO"
