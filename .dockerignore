@@ -1,0 +1,19 @@
+# Ignore git and build artifacts
+.git
+.gitignore
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.dylib
+*.egg-info/
+*.pytest_cache/
+.nox/
+.venv/
+venv/
+*.csv
+schedule.csv
+examples/
+tests/
+Dockerfile

@@ -64,7 +64,9 @@ PYTHONPATH=.:src python examples/example_request.py
 
 ## Docker
 
-A `Dockerfile` is provided for building the server into a container image. Build the image and run it locally with:
+A `Dockerfile` is provided for building the server into a container image. A
+`.dockerignore` file excludes development artifacts so the image stays small.
+Build the image and run it locally with:
 
 ```bash
 docker build -t schedule-server .
