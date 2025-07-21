@@ -1,6 +1,6 @@
 import logging
 
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify, request
 from google.protobuf import json_format
 
 import src.scheduler_pb2 as scheduler_pb2
@@ -53,10 +53,6 @@ def build_schedule_response(
 @app.route("/")
 def root():
     return app.send_static_file("index.html")
-
-
-# Removed the custom static file route. Flask's built-in static file serving will handle requests to the static directory.
-
 
 @app.get("/liveness_check")
 @app.get("/_ah/liveness_check")
