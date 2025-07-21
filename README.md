@@ -32,8 +32,8 @@ nox -s run
 The server will start on port `50051`. An additional HTTP server listens on
 port `8080` and exposes simple health endpoints used by GCP App Engine:
 
-* `/health`
-* `/readiness`
+* `/liveness_check`
+* `/readiness_check`
 
 Both endpoints return `200 OK` with the body `"ok"`.
 

@@ -18,7 +18,12 @@ class HealthHandler(BaseHTTPRequestHandler):
     """Simple HTTP handler for health and readiness checks."""
 
     def do_GET(self) -> None:  # noqa: D401 -- required method signature
-        if self.path in ("/health", "/readiness", "/_ah/health", "/_ah/readiness"):
+        if self.path in (
+            "/liveness_check",
+            "/readiness_check",
+            "/_ah/liveness_check",
+            "/_ah/readiness_check",
+        ):
             self.send_response(200)
             self.send_header("Content-Type", "text/plain")
             self.end_headers()
