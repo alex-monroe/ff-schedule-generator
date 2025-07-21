@@ -74,6 +74,8 @@ class TestServerIntegration(unittest.TestCase):
             raise unittest.SkipTest("docker command not available")
 
         _compile_protos()
+        # Add the generated protobuf code to the path
+        sys.path.append(os.path.join(ROOT_DIR, "src"))
         _build_image()
         global scheduler_pb2, scheduler_pb2_grpc
         scheduler_pb2 = importlib.import_module("scheduler_pb2")
@@ -126,11 +128,19 @@ class TestServerIntegration(unittest.TestCase):
     def test_health_endpoints(self):
         """Verify health and readiness endpoints return 200."""
         for path in ("liveness_check", "readiness_check"):
-            url = f"http://localhost:8080/{path}"
+            url = f"http://127.0.0.1:8080/{path}"
             with urllib.request.urlopen(url) as resp:
                 body = resp.read().decode()
                 self.assertEqual(resp.getcode(), 200)
                 self.assertEqual(body, "ok")
+
+    def test_root_path_returns_ok(self):
+        """Verify the root path returns a 200 OK."""
+        url = "http://127.0.0.1:8080/"
+        with urllib.request.urlopen(url) as resp:
+            body = resp.read().decode()
+            self.assertEqual(resp.getcode(), 200)
+            self.assertEqual(body, "OK")
 
     def test_generate_schedule_invalid_divisions(self):
         """Requests with more than two divisions should return an error."""
