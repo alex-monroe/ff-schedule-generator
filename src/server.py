@@ -54,6 +54,7 @@ def build_schedule_response(
 def root():
     return app.send_static_file("index.html")
 
+
 @app.get("/liveness_check")
 @app.get("/_ah/liveness_check")
 @app.get("/readiness_check")
