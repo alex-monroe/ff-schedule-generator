@@ -111,12 +111,8 @@ class TestServerIntegration(unittest.TestCase):
             request.league.append(scheduler_pb2.Team(name=f"Div1 Team {i+1}", division_id=1))
             request.league.append(scheduler_pb2.Team(name=f"Div0 Team {i+1}", division_id=0))
         url = "http://127.0.0.1:8080/generate-schedule"
-        req_dict = json.loads(
-            json.dumps(
-                json_format.MessageToDict(
-                    request, preserving_proto_field_name=True
-                )
-            )
+        req_dict = json_format.MessageToDict(
+            request, preserving_proto_field_name=True
         )
         data = json.dumps(req_dict).encode()
         http_req = urllib.request.Request(
@@ -163,12 +159,8 @@ class TestServerIntegration(unittest.TestCase):
         for i in range(3):
             request.league.append(scheduler_pb2.Team(name=f"Div2 Team {i+1}", division_id=2))
         url = "http://127.0.0.1:8080/generate-schedule"
-        req_dict = json.loads(
-            json.dumps(
-                json_format.MessageToDict(
-                    request, preserving_proto_field_name=True
-                )
-            )
+        req_dict = json_format.MessageToDict(
+            request, preserving_proto_field_name=True
         )
         data = json.dumps(req_dict).encode()
         http_req = urllib.request.Request(
