@@ -1,5 +1,8 @@
 from concurrent import futures
 import logging
+import threading
+from http.server import BaseHTTPRequestHandler, HTTPServer
+
 import grpc
 from grpc_reflection.v1alpha import reflection
 
@@ -9,6 +12,20 @@ from src import schedule_generator
 
 
 logger = logging.getLogger(__name__)
+
+
+class HealthHandler(BaseHTTPRequestHandler):
+    """Simple HTTP handler for health and readiness checks."""
+
+    def do_GET(self) -> None:  # noqa: D401 -- required method signature
+        if self.path in ("/health", "/readiness", "/_ah/health", "/_ah/readiness"):
+            self.send_response(200)
+            self.send_header("Content-Type", "text/plain")
+            self.end_headers()
+            self.wfile.write(b"ok")
+        else:
+            self.send_response(404)
+            self.end_headers()
 
 
 class SchedulerServicer(scheduler_pb2_grpc.SchedulerServicer):
@@ -68,6 +85,11 @@ def serve():
         level=logging.INFO,
         format="[%(asctime)s] %(levelname)s %(name)s: %(message)s",
     )
+
+    # Start HTTP health server on port 8080 in a separate thread
+    httpd = HTTPServer(("0.0.0.0", 8080), HealthHandler)
+    threading.Thread(target=httpd.serve_forever, daemon=True).start()
+    logger.info("Health server started on port 8080")
 
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     scheduler_pb2_grpc.add_SchedulerServicer_to_server(SchedulerServicer(), server)
