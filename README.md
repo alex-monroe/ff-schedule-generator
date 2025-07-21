@@ -93,3 +93,7 @@ docker run -p 8080:8080 schedule-server
 
 The image compiles the protobuf definitions during build and starts the HTTP server on port `8080`.
 The `compile_protos.py` script is copied into the image so that any new `.proto` files will be included automatically.
+
+## Deployment Smoke Test
+
+A GitHub Actions workflow runs `examples/example_request_https.py` after each deployment and once a day to verify that the production server responds correctly. The script sends a simple schedule request and checks that the response contains 13 weeks with five matchups per week.
