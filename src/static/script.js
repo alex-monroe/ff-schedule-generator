@@ -55,10 +55,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderSchedule(data);
             } else {
                 const error = await response.json();
-                scheduleOutput.innerHTML = `<p>Error: ${error.error}</p>`;
+                scheduleOutput.textContent = `Error: ${error.error}`;
             }
         } catch (error) {
-            scheduleOutput.innerHTML = `<p>Error: ${error.message}</p>`;
+            scheduleOutput.textContent = `Error: ${error.message}`;
         }
     });
 
