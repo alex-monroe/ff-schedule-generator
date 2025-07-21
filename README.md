@@ -59,7 +59,7 @@ for i in range(10):
 req_dict = json_format.MessageToDict(request, preserving_proto_field_name=True)
 data = json.dumps(req_dict).encode()
 http_req = urllib.request.Request(
-    'http://localhost:8080/generate-schedule',
+    'https://ff-scheduler-466320.uw.r.appspot.com/generate-schedule',
     data=data,
     headers={'Content-Type': 'application/json'}
 )
@@ -73,11 +73,11 @@ Ensure the protobuf files are built (`nox -s build`) so that `scheduler_pb2` is
 available before running the snippet.
 
 You can also run the example script in `examples/example_request.py` to see the
-same request in action. Pass the server IP if it is not running locally:
+same request in action against the hosted API:
 
 ```bash
 nox -s build
-PYTHONPATH=.:src python examples/example_request.py 192.168.1.50
+PYTHONPATH=.:src python examples/example_request.py
 ```
 
 ## Docker

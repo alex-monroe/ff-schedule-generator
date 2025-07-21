@@ -1,8 +1,8 @@
 import argparse
-import urllib.parse
-import grpc
+import json
+import urllib.request
+from google.protobuf import json_format
 from src import scheduler_pb2
-from src import scheduler_pb2_grpc
 
 
 def build_request(num_teams: int) -> scheduler_pb2.ScheduleRequest:
@@ -17,16 +17,17 @@ def build_request(num_teams: int) -> scheduler_pb2.ScheduleRequest:
     return request
 
 
-def main(url: str) -> None:
+def main(url: str = "https://ff-scheduler-466320.uw.r.appspot.com") -> None:
     """Send an example schedule request to a deployed server via HTTPS."""
-    parsed = urllib.parse.urlparse(url)
-    host = parsed.netloc or parsed.path
-    target = f"{host}:443"
-    channel = grpc.secure_channel(target, grpc.ssl_channel_credentials())
-    stub = scheduler_pb2_grpc.SchedulerStub(channel)
-
+    url = url.rstrip("/") + "/generate-schedule"
     request = build_request(10)
-    response = stub.GenerateSchedule(request)
+    req_dict = json_format.MessageToDict(request, preserving_proto_field_name=True)
+    data = json.dumps(req_dict).encode()
+    http_req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
+    with urllib.request.urlopen(http_req) as resp:
+        resp_data = json.load(resp)
+
+    response = json_format.ParseDict(resp_data, scheduler_pb2.ScheduleResponse())
 
     for week_idx, weekly in enumerate(response.matchups, start=1):
         print(f"Week {week_idx}")
@@ -35,12 +36,14 @@ def main(url: str) -> None:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Send an example ScheduleRequest over HTTPS")
+    parser = argparse.ArgumentParser(
+        description="Send an example ScheduleRequest to the HTTPS service"
+    )
     parser.add_argument(
         "url",
         nargs="?",
         default="https://ff-scheduler-466320.uw.r.appspot.com",
-        help="Full HTTPS URL of the deployed API",
+        help="Base URL of the schedule service",
     )
     args = parser.parse_args()
     main(args.url)

@@ -15,10 +15,10 @@ def build_request(num_teams: int) -> scheduler_pb2.ScheduleRequest:
     return request
 
 
-def main(host: str = "localhost") -> None:
+def main(url: str = "https://ff-scheduler-466320.uw.r.appspot.com") -> None:
     """Send an example schedule request to the HTTP server."""
 
-    url = f"http://{host}:8080/generate-schedule"
+    url = url.rstrip("/") + "/generate-schedule"
     request = build_request(10)
     req_dict = json_format.MessageToDict(
         request, preserving_proto_field_name=True
@@ -39,12 +39,14 @@ def main(host: str = "localhost") -> None:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Send an example ScheduleRequest")
+    parser = argparse.ArgumentParser(
+        description="Send an example ScheduleRequest over HTTP"
+    )
     parser.add_argument(
-        "host",
+        "url",
         nargs="?",
-        default="localhost",
-        help="IP or hostname of the running HTTP server (default: localhost)",
+        default="https://ff-scheduler-466320.uw.r.appspot.com",
+        help="Base URL of the schedule service",
     )
     args = parser.parse_args()
-    main(args.host)
+    main(args.url)
