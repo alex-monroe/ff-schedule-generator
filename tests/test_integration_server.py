@@ -125,7 +125,7 @@ class TestServerIntegration(unittest.TestCase):
 
     def test_health_endpoints(self):
         """Verify health and readiness endpoints return 200."""
-        for path in ("health", "readiness"):
+        for path in ("liveness_check", "readiness_check"):
             url = f"http://localhost:8080/{path}"
             with urllib.request.urlopen(url) as resp:
                 body = resp.read().decode()
