@@ -7,8 +7,10 @@ import logging
 import importlib
 import shutil
 import urllib.request
+import urllib.error
 
-import grpc
+import json
+from google.protobuf import json_format
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 DOCKER_IMAGE = "schedule-server:test"
@@ -55,8 +57,6 @@ def _run_container() -> subprocess.Popen:
         "--name",
         CONTAINER_NAME,
         "-p",
-        "50051:50051",
-        "-p",
         "8080:8080",
         "--rm",
         DOCKER_IMAGE,
@@ -77,10 +77,9 @@ class TestServerIntegration(unittest.TestCase):
         # Add the generated protobuf code to the path
         sys.path.append(os.path.join(ROOT_DIR, "src"))
         _build_image()
-        global scheduler_pb2, scheduler_pb2_grpc
+        global scheduler_pb2
         scheduler_pb2 = importlib.import_module("scheduler_pb2")
-        scheduler_pb2_grpc = importlib.import_module("scheduler_pb2_grpc")
-        logging.info("Launching gRPC server container for integration test")
+        logging.info("Launching HTTP server container for integration test")
         cls.proc = _run_container()
         # give the server some time to start
         time.sleep(1)
@@ -88,7 +87,7 @@ class TestServerIntegration(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        logging.info("Stopping gRPC server container")
+        logging.info("Stopping server container")
         subprocess.run(
             ["docker", "stop", CONTAINER_NAME],
             cwd=ROOT_DIR,
@@ -105,17 +104,21 @@ class TestServerIntegration(unittest.TestCase):
 
     def test_generate_schedule_returns_matchups(self):
         logging.info("Sending GenerateSchedule request to server")
-        channel = grpc.insecure_channel("localhost:50051")
-        stub = scheduler_pb2_grpc.SchedulerStub(channel)
-
         request = scheduler_pb2.ScheduleRequest()
         # Create 10 teams split across two divisions but interleaved in the
         # request to ensure the server reorders them correctly.
         for i in range(5):
             request.league.append(scheduler_pb2.Team(name=f"Div1 Team {i+1}", division_id=1))
             request.league.append(scheduler_pb2.Team(name=f"Div0 Team {i+1}", division_id=0))
+        url = "http://127.0.0.1:8080/generate-schedule"
+        req_dict = json.loads(json.dumps(json_format.MessageToDict(request, preserving_proto_field_name=True)))
+        data = json.dumps(req_dict).encode()
+        http_req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
+        with urllib.request.urlopen(http_req) as resp:
+            self.assertEqual(resp.getcode(), 200)
+            resp_data = json.load(resp)
 
-        response = stub.GenerateSchedule(request)
+        response = json_format.ParseDict(resp_data, scheduler_pb2.ScheduleResponse())
         logging.info("Received response with %d weeks", len(response.matchups))
 
         self.assertIsInstance(response, scheduler_pb2.ScheduleResponse)
@@ -123,7 +126,6 @@ class TestServerIntegration(unittest.TestCase):
         for weekly in response.matchups:
             self.assertEqual(len(weekly.matchups), 5)
 
-        channel.close()
 
     def test_health_endpoints(self):
         """Verify health and readiness endpoints return 200."""
@@ -145,9 +147,6 @@ class TestServerIntegration(unittest.TestCase):
     def test_generate_schedule_invalid_divisions(self):
         """Requests with more than two divisions should return an error."""
         logging.info("Sending invalid GenerateSchedule request to server")
-        channel = grpc.insecure_channel("localhost:50051")
-        stub = scheduler_pb2_grpc.SchedulerStub(channel)
-
         request = scheduler_pb2.ScheduleRequest()
         # Create teams across three divisions to trigger the validation.
         for i in range(4):
@@ -156,12 +155,18 @@ class TestServerIntegration(unittest.TestCase):
             request.league.append(scheduler_pb2.Team(name=f"Div1 Team {i+1}", division_id=1))
         for i in range(3):
             request.league.append(scheduler_pb2.Team(name=f"Div2 Team {i+1}", division_id=2))
+        url = "http://127.0.0.1:8080/generate-schedule"
+        req_dict = json.loads(json.dumps(json_format.MessageToDict(request, preserving_proto_field_name=True)))
+        data = json.dumps(req_dict).encode()
+        http_req = urllib.request.Request(
+            url, data=data, headers={"Content-Type": "application/json"}
+        )
+        with self.assertRaises(urllib.error.HTTPError) as cm:
+            urllib.request.urlopen(http_req)
 
-        with self.assertRaises(grpc.RpcError) as cm:
-            stub.GenerateSchedule(request)
-        self.assertEqual(cm.exception.code(), grpc.StatusCode.INVALID_ARGUMENT)
-
-        channel.close()
+        self.assertEqual(cm.exception.code, 400)
+        body = json.loads(cm.exception.read().decode())
+        self.assertIn("error", body)
 
 
 if __name__ == "__main__":
