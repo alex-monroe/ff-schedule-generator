@@ -1,11 +1,14 @@
 from concurrent import futures
 import logging
+from threading import Thread
+
 import grpc
 from grpc_reflection.v1alpha import reflection
 
 import src.scheduler_pb2 as scheduler_pb2
 import src.scheduler_pb2_grpc as scheduler_pb2_grpc
 from src import schedule_generator
+from src import web_server
 
 
 logger = logging.getLogger(__name__)
@@ -68,6 +71,15 @@ def serve():
         level=logging.INFO,
         format="[%(asctime)s] %(levelname)s %(name)s: %(message)s",
     )
+
+    # Start the web server in a separate thread. This will be used for health
+    # checks and other non-gRPC purposes.
+    app = web_server.create_app()
+    web_server_thread = Thread(target=app.run, kwargs={"host": "0.0.0.0", "port": 8080})
+    web_server_thread.daemon = True
+    web_server_thread.start()
+
+    logger.info("Web server started on port 8080")
 
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     scheduler_pb2_grpc.add_SchedulerServicer_to_server(SchedulerServicer(), server)
