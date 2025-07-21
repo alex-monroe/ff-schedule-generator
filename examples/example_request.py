@@ -1,7 +1,8 @@
 import argparse
-import grpc
+import json
+import urllib.request
+from google.protobuf import json_format
 from src import scheduler_pb2
-from src import scheduler_pb2_grpc
 
 
 def build_request(num_teams: int) -> scheduler_pb2.ScheduleRequest:
@@ -15,13 +16,21 @@ def build_request(num_teams: int) -> scheduler_pb2.ScheduleRequest:
 
 
 def main(host: str = "localhost") -> None:
-    """Send an example schedule request to the server."""
+    """Send an example schedule request to the HTTP server."""
 
-    channel = grpc.insecure_channel(f"{host}:50051")
-    stub = scheduler_pb2_grpc.SchedulerStub(channel)
-
+    url = f"http://{host}:8080/generate-schedule"
     request = build_request(10)
-    response = stub.GenerateSchedule(request)
+    req_dict = json_format.MessageToDict(
+        request, preserving_proto_field_name=True
+    )
+    data = json.dumps(req_dict).encode()
+    http_req = urllib.request.Request(
+        url, data=data, headers={"Content-Type": "application/json"}
+    )
+    with urllib.request.urlopen(http_req) as resp:
+        resp_data = json.load(resp)
+
+    response = json_format.ParseDict(resp_data, scheduler_pb2.ScheduleResponse())
 
     for week_idx, weekly in enumerate(response.matchups, start=1):
         print(f"Week {week_idx}")
@@ -35,7 +44,7 @@ if __name__ == "__main__":
         "host",
         nargs="?",
         default="localhost",
-        help="IP or hostname of the running gRPC server (default: localhost)",
+        help="IP or hostname of the running HTTP server (default: localhost)",
     )
     args = parser.parse_args()
     main(args.host)
