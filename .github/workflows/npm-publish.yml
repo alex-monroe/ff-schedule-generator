@@ -1,0 +1,43 @@
+name: Publish Protos to npm
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/protos/**'
+    tags:
+      - 'npm-v*'
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        working-directory: npm
+        run: npm install
+
+      - name: Compile TypeScript protos
+        working-directory: npm
+        run: npm run build
+
+      - name: Bump package version
+        working-directory: npm
+        run: npm version patch --no-git-tag-version
+
+      - name: Publish package
+        working-directory: npm
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

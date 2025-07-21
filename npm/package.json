@@ -1,0 +1,17 @@
+{
+  "name": "ff-schedule-protos",
+  "version": "0.1.0",
+  "description": "TypeScript protobuf definitions for Fantasy Football Schedule Generator",
+  "main": "dist/scheduler.js",
+  "types": "dist/scheduler.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "mkdir -p dist && pbjs -t static-module -w es6 -o dist/scheduler.js ../src/protos/scheduler.proto && pbts -o dist/scheduler.d.ts dist/scheduler.js"
+  },
+  "devDependencies": {
+    "protobufjs": "^7.2.4",
+    "protobufjs-cli": "^1.1.3"
+  }
+}
