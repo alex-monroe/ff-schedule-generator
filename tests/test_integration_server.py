@@ -111,9 +111,17 @@ class TestServerIntegration(unittest.TestCase):
             request.league.append(scheduler_pb2.Team(name=f"Div1 Team {i+1}", division_id=1))
             request.league.append(scheduler_pb2.Team(name=f"Div0 Team {i+1}", division_id=0))
         url = "http://127.0.0.1:8080/generate-schedule"
-        req_dict = json.loads(json.dumps(json_format.MessageToDict(request, preserving_proto_field_name=True)))
+        req_dict = json.loads(
+            json.dumps(
+                json_format.MessageToDict(
+                    request, preserving_proto_field_name=True
+                )
+            )
+        )
         data = json.dumps(req_dict).encode()
-        http_req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
+        http_req = urllib.request.Request(
+            url, data=data, headers={"Content-Type": "application/json"}
+        )
         with urllib.request.urlopen(http_req) as resp:
             self.assertEqual(resp.getcode(), 200)
             resp_data = json.load(resp)
@@ -125,7 +133,6 @@ class TestServerIntegration(unittest.TestCase):
         self.assertEqual(len(response.matchups), 13)
         for weekly in response.matchups:
             self.assertEqual(len(weekly.matchups), 5)
-
 
     def test_health_endpoints(self):
         """Verify health and readiness endpoints return 200."""
@@ -156,10 +163,18 @@ class TestServerIntegration(unittest.TestCase):
         for i in range(3):
             request.league.append(scheduler_pb2.Team(name=f"Div2 Team {i+1}", division_id=2))
         url = "http://127.0.0.1:8080/generate-schedule"
-        req_dict = json.loads(json.dumps(json_format.MessageToDict(request, preserving_proto_field_name=True)))
+        req_dict = json.loads(
+            json.dumps(
+                json_format.MessageToDict(
+                    request, preserving_proto_field_name=True
+                )
+            )
+        )
         data = json.dumps(req_dict).encode()
         http_req = urllib.request.Request(
-            url, data=data, headers={"Content-Type": "application/json"}
+            url,
+            data=data,
+            headers={"Content-Type": "application/json"},
         )
         with self.assertRaises(urllib.error.HTTPError) as cm:
             urllib.request.urlopen(http_req)
