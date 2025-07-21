@@ -18,7 +18,12 @@ class HealthHandler(BaseHTTPRequestHandler):
     """Simple HTTP handler for health and readiness checks."""
 
     def do_GET(self) -> None:  # noqa: D401 -- required method signature
-        if self.path in (
+        if self.path == "/":
+            self.send_response(200)
+            self.send_header("Content-Type", "text/plain")
+            self.end_headers()
+            self.wfile.write(b"OK")
+        elif self.path in (
             "/liveness_check",
             "/readiness_check",
             "/_ah/liveness_check",
@@ -106,7 +111,7 @@ def serve():
     )
     reflection.enable_server_reflection(SERVICE_NAMES, server)
 
-    server.add_insecure_port("[::]:50051")
+    server.add_insecure_port("0.0.0.0:50051")
     server.start()
     logger.info("Server started on port 50051 with reflection enabled")
     server.wait_for_termination()
