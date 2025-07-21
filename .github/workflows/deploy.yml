@@ -38,3 +38,4 @@ jobs:
           deliverables: app.yaml
           version: ${{ env.version }}
           promote: true
+          flags: --verbosity=debug
