@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule Generator</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>Schedule Generator</h1>
+    <div id="controls">
+        <div id="teams-container">
+            <h2>Teams</h2>
+            <div id="teams-list"></div>
+            <input type="text" id="team-name" placeholder="Team Name">
+            <select id="team-division"></select>
+            <button id="add-team">Add Team</button>
+        </div>
+        <div id="divisions-container">
+            <h2>Divisions</h2>
+            <div id="divisions-list"></div>
+            <input type="text" id="division-name" placeholder="Division Name">
+            <button id="add-division">Add Division</button>
+        </div>
+    </div>
+    <button id="generate-schedule">Generate Schedule</button>
+    <div id="schedule-container">
+        <h2>Generated Schedule</h2>
+        <div id="schedule-output"></div>
+    </div>
+    <script src="/static/script.js"></script>
+</body>
+</html>

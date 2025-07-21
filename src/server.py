@@ -1,13 +1,13 @@
 import logging
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_from_directory
 from google.protobuf import json_format
 
 import src.scheduler_pb2 as scheduler_pb2
 from src import schedule_generator
 
 logger = logging.getLogger(__name__)
-app = Flask(__name__)
+app = Flask(__name__, static_folder="static")
 
 
 def build_schedule_response(
@@ -50,9 +50,14 @@ def build_schedule_response(
     return response
 
 
-@app.get("/")
-def root() -> tuple[str, int]:
-    return "OK", 200
+@app.route("/")
+def root():
+    return app.send_static_file("index.html")
+
+
+@app.route("/static/<path:path>")
+def send_static(path):
+    return send_from_directory("static", path)
 
 
 @app.get("/liveness_check")
