@@ -6,6 +6,7 @@ import subprocess
 import logging
 import importlib
 import shutil
+import urllib.request
 
 import grpc
 
@@ -55,6 +56,8 @@ def _run_container() -> subprocess.Popen:
         CONTAINER_NAME,
         "-p",
         "50051:50051",
+        "-p",
+        "8080:8080",
         "--rm",
         DOCKER_IMAGE,
     ], cwd=ROOT_DIR)
@@ -119,6 +122,15 @@ class TestServerIntegration(unittest.TestCase):
             self.assertEqual(len(weekly.matchups), 5)
 
         channel.close()
+
+    def test_health_endpoints(self):
+        """Verify health and readiness endpoints return 200."""
+        for path in ("health", "readiness"):
+            url = f"http://localhost:8080/{path}"
+            with urllib.request.urlopen(url) as resp:
+                body = resp.read().decode()
+                self.assertEqual(resp.getcode(), 200)
+                self.assertEqual(body, "ok")
 
     def test_generate_schedule_invalid_divisions(self):
         """Requests with more than two divisions should return an error."""

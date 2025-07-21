@@ -16,6 +16,6 @@ RUN python compile_protos.py
 # Set PYTHONPATH so the server can find the generated modules
 ENV PYTHONPATH=/app
 
-EXPOSE 50051
+EXPOSE 50051 8080
 
 CMD ["python", "src/server.py"]
