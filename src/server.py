@@ -55,9 +55,7 @@ def root():
     return app.send_static_file("index.html")
 
 
-@app.route("/static/<path:path>")
-def send_static(path):
-    return send_from_directory("static", path)
+# Removed the custom static file route. Flask's built-in static file serving will handle requests to the static directory.
 
 
 @app.get("/liveness_check")
