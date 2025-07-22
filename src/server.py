@@ -9,7 +9,13 @@ from src import schedule_generator
 
 logger = logging.getLogger(__name__)
 app = Flask(__name__)
-CORS(app)
+# Allow cross-origin requests only from trusted domains.
+TRUSTED_ORIGINS = [
+    r".*\.vercel\.app$",
+    r".*google.*",
+    r".*gcp.*",
+]
+CORS(app, origins=TRUSTED_ORIGINS)
 
 
 def build_schedule_response(
