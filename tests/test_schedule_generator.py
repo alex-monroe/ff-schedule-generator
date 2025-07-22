@@ -15,9 +15,9 @@ class TestScheduleGenerator(unittest.TestCase):
             [[f"var_{i}_{j}_{w}" for w in self.weeks] for j in self.teams] for i in self.teams
         ]
 
-    def test_getTeamsVariablesForWeek(self):
+    def test_get_team_variables_for_week(self):
         # Test for team 3, week 5
-        result = schedule_generator.getTeamsVariablesForWeek(
+        result = schedule_generator.get_team_variables_for_week(
             self.mock_variables, 3, 5, self.weeks, self.teams
         )
 
@@ -30,20 +30,20 @@ class TestScheduleGenerator(unittest.TestCase):
         self.assertCountEqual(result, expected_vars)
 
         # Test with a team that doesn't exist
-        result_invalid_team = schedule_generator.getTeamsVariablesForWeek(
+        result_invalid_team = schedule_generator.get_team_variables_for_week(
             self.mock_variables, 99, 5, self.weeks, self.teams
         )
         self.assertEqual(result_invalid_team, [])
 
         # Test with a week that doesn't exist
-        result_invalid_week = schedule_generator.getTeamsVariablesForWeek(
+        result_invalid_week = schedule_generator.get_team_variables_for_week(
             self.mock_variables, 3, 99, self.weeks, self.teams
         )
         self.assertEqual(result_invalid_week, [])
 
-    def test_getTeamsVariablesForAllWeeks(self):
+    def test_get_team_variables_for_all_weeks(self):
         # Test for team 1 vs team 8
-        result = schedule_generator.getTeamsVariablesForAllWeeks(
+        result = schedule_generator.get_team_variables_for_all_weeks(
             self.mock_variables, 1, 8, self.weeks, self.teams
         )
 
@@ -55,7 +55,7 @@ class TestScheduleGenerator(unittest.TestCase):
         self.assertCountEqual(result, expected_vars)
 
         # Test with teams that don't exist
-        result_invalid_teams = schedule_generator.getTeamsVariablesForAllWeeks(
+        result_invalid_teams = schedule_generator.get_team_variables_for_all_weeks(
             self.mock_variables, 99, 100, self.weeks, self.teams
         )
         self.assertEqual(result_invalid_teams, [])
