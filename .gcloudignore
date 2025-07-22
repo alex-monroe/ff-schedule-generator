@@ -15,4 +15,3 @@ venv/
 *.csv
 examples/
 tests/
-Dockerfile
