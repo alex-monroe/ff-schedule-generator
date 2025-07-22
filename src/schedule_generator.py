@@ -41,8 +41,15 @@ def _get_schedule_data(variables, weeks_param, teams_param):
     return schedule_data
 
 
-def generate_schedule(num_weeks, num_teams):
-    logger.info("Generating schedule: %d weeks, %d teams", num_weeks, num_teams)
+def generate_schedule(
+    num_weeks,
+    num_teams,
+    in_division_play_twice=False,
+    out_of_division_play_once=False,
+):
+    logger.info(
+        "Generating schedule: %d weeks, %d teams", num_weeks, num_teams
+    )
     weeks = range(num_weeks)
     teams = range(num_teams)
 
@@ -89,31 +96,37 @@ def generate_schedule(num_weeks, num_teams):
                     constraint.SetCoefficient(variables[team][team2][week], 1)
                     constraint.SetCoefficient(variables[team2][team][week], -1)
 
-    # Teams within the division play each other twice
-    # for each team combination in each division, for all weeks
-    #  sum( x[i][j][w] ) = 4
-    for team in teams:
-        for team2 in teams:
-            if (team != team2) and (
-                (team < num_teams / 2 and team2 < num_teams / 2)
-                or (team >= num_teams / 2 and team2 >= num_teams / 2)
-            ):
-                constraint = solver.RowConstraint(4, 4, "")
-                for variable in getTeamsVariablesForAllWeeks(variables, team, team2, weeks, teams):
-                    constraint.SetCoefficient(variable, 1)
+    if in_division_play_twice:
+        # Teams within the division play each other twice
+        # for each team combination in each division, for all weeks
+        #  sum( x[i][j][w] ) = 4
+        for team in teams:
+            for team2 in teams:
+                if (team != team2) and (
+                    (team < num_teams / 2 and team2 < num_teams / 2)
+                    or (team >= num_teams / 2 and team2 >= num_teams / 2)
+                ):
+                    constraint = solver.RowConstraint(4, 4, "")
+                    for variable in getTeamsVariablesForAllWeeks(
+                        variables, team, team2, weeks, teams
+                    ):
+                        constraint.SetCoefficient(variable, 1)
 
-    # Teams play out of division opponents once
-    # for each team combination outside each division, for all weeks
-    #  sum( x[i][j][w] ) = 2
-    for team in teams:
-        for team2 in teams:
-            if (team != team2) and not (
-                (team < num_teams / 2 and team2 < num_teams / 2)
-                or (team >= num_teams / 2 and team2 >= num_teams / 2)
-            ):
-                constraint = solver.RowConstraint(2, 2, "")
-                for variable in getTeamsVariablesForAllWeeks(variables, team, team2, weeks, teams):
-                    constraint.SetCoefficient(variable, 1)
+    if out_of_division_play_once:
+        # Teams play out of division opponents once
+        # for each team combination outside each division, for all weeks
+        #  sum( x[i][j][w] ) = 2
+        for team in teams:
+            for team2 in teams:
+                if (team != team2) and not (
+                    (team < num_teams / 2 and team2 < num_teams / 2)
+                    or (team >= num_teams / 2 and team2 >= num_teams / 2)
+                ):
+                    constraint = solver.RowConstraint(2, 2, "")
+                    for variable in getTeamsVariablesForAllWeeks(
+                        variables, team, team2, weeks, teams
+                    ):
+                        constraint.SetCoefficient(variable, 1)
 
     # Teams do not play the same matchup in the same 4 week span
     for team in teams:

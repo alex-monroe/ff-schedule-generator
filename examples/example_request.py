@@ -13,6 +13,8 @@ def build_request(num_teams: int) -> scheduler_pb2.ScheduleRequest:
     for i in range(num_teams // 2):
         request.league.append(scheduler_pb2.Team(name=f"Division 0 Team {i+1}", division_id=0))
         request.league.append(scheduler_pb2.Team(name=f"Division 1 Team {i+1}", division_id=1))
+    request.in_division_play_twice = True
+    request.out_of_division_play_once = True
     return request
 
 

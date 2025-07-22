@@ -41,7 +41,12 @@ def build_schedule_response(
         logger.info("No teams provided in request")
         return response
 
-    schedule_data = schedule_generator.generate_schedule(13, num_teams)
+    schedule_data = schedule_generator.generate_schedule(
+        13,
+        num_teams,
+        req.in_division_play_twice,
+        req.out_of_division_play_once,
+    )
 
     if isinstance(schedule_data, str):
         logger.error("Schedule generation failed: %s", schedule_data)
