@@ -1,0 +1,39 @@
+name: Create npm Version Bump PR
+
+on:
+  workflow_dispatch:
+
+jobs:
+  bump-version:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        working-directory: npm
+        run: npm install
+
+      - name: Bump package version
+        working-directory: npm
+        run: npm version patch --no-git-tag-version
+
+      - name: Create pull request for version bump
+        uses: peter-evans/create-pull-request@v5
+        with:
+          commit-message: "chore: bump npm package version"
+          title: "chore: bump npm package version"
+          body: Automated version bump.
+          branch: npm-version-bump-${{ github.run_id }}
+          base: main
+          add-paths: |
+            npm/package.json
+            npm/package-lock.json
+          delete-branch: true
