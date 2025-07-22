@@ -13,7 +13,6 @@ __pycache__/
 .venv/
 venv/
 *.csv
-schedule.csv
 examples/
 tests/
 Dockerfile
