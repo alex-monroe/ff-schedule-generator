@@ -79,6 +79,20 @@ class TestScheduleGeneratorIntegration(unittest.TestCase):
                 )
 
 
+class TestScheduleGeneratorTwoTeams(unittest.TestCase):
+    """Integration test for the simplest possible schedule."""
+
+    def test_two_teams_no_options(self):
+        """Solver should schedule a single matchup for two teams."""
+        schedule_data = schedule_generator.generate_schedule(
+            1,
+            2,
+            False,
+            False,
+        )
+        self.assertEqual(schedule_data, [["Week", "Team1", "Team2"], [0, 0, 1]])
+
+
 if __name__ == "__main__":
     logging.basicConfig(
         level=logging.INFO,
