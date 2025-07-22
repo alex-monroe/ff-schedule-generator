@@ -11,7 +11,8 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 # Allow cross-origin requests only from trusted domains.
 TRUSTED_ORIGINS = [
-    r".*\.vercel\.app$",
+    # Allow all subdomains of vercel.app and any paths beneath them.
+    r".*\.vercel\.app.*",
     r".*google.*",
     r".*gcp.*",
 ]

@@ -41,7 +41,8 @@ Both endpoints return `200 OK` with the body `"ok"`.
 
 Cross-Origin Resource Sharing (CORS) is enabled so browser-based clients can
 request schedules from trusted domains. Requests originating from `*.vercel.app`
-or any domain containing `google` or `gcp` are allowed.
+(including any paths under those subdomains) or any domain containing `google`
+or `gcp` are allowed.
 
 ## Example Request
 
