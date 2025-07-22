@@ -39,6 +39,11 @@ The server listens on port `8080` and exposes health endpoints used by GCP App E
 
 Both endpoints return `200 OK` with the body `"ok"`.
 
+Cross-Origin Resource Sharing (CORS) is enabled so browser-based clients can
+request schedules from trusted domains. Requests originating from `*.vercel.app`
+(including any paths under those subdomains) or any domain containing `google`
+or `gcp` are allowed.
+
 ## Example Request
 
 After starting the server, you can send an HTTP request to it using Python. The

@@ -1,6 +1,7 @@
 import logging
 
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 from google.protobuf import json_format
 
 import src.scheduler_pb2 as scheduler_pb2
@@ -8,6 +9,14 @@ from src import schedule_generator
 
 logger = logging.getLogger(__name__)
 app = Flask(__name__)
+# Allow cross-origin requests only from trusted domains.
+TRUSTED_ORIGINS = [
+    # Allow all subdomains of vercel.app and any paths beneath them.
+    r".*\.vercel\.app.*",
+    r".*google.*",
+    r".*gcp.*",
+]
+CORS(app, origins=TRUSTED_ORIGINS)
 
 
 def build_schedule_response(
