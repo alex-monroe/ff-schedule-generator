@@ -37,5 +37,5 @@ jobs:
             --project ${{ secrets.GCP_PROJECT_ID }} \
             --version ${{ env.version }} \
             --promote \
-            --verbosity debug \
+            --verbosity=debug \
             --quiet
