@@ -4,28 +4,41 @@ from ortools.linear_solver import pywraplp
 logger = logging.getLogger(__name__)
 
 
-# Returns all of the variables in variables that correspond to the
-# given team playing in a game in the given week
-# Excludes variables representing the team playing itself
-def getTeamsVariablesForWeek(variables, team, week, weeks_param, teams_param):
-    teamsVariables = []
+# Returns all of the variables in ``variables`` that correspond to the given
+# team playing in a game during the specified week. Variables representing the
+# team playing itself are excluded.
+def get_team_variables_for_week(variables, team, week, weeks_param, teams_param):
+    teams_variables = []
     for w in weeks_param:
         for i in teams_param:
             for j in teams_param:
                 if ((i == team) or (j == team)) and (i != j) and (w == week):
-                    teamsVariables.append(variables[i][j][w])
-    return teamsVariables
+                    teams_variables.append(variables[i][j][w])
+    return teams_variables
 
 
-# Returns all of the variables in variables that represent team 1 playing in team 2 in any week
-def getTeamsVariablesForAllWeeks(variables, team1, team2, weeks_param, teams_param):
-    teamsVariables = []
+# Backwards compatibility
+getTeamsVariablesForWeek = get_team_variables_for_week
+
+
+# Returns all of the variables in ``variables`` that represent ``team1`` playing
+# ``team2`` in any week.
+def get_team_variables_for_all_weeks(
+    variables, team1, team2, weeks_param, teams_param
+):
+    teams_variables = []
     for w in weeks_param:
         for i in teams_param:
             for j in teams_param:
-                if ((i == team1) and (j == team2)) or ((i == team2) and (j == team1)):
-                    teamsVariables.append(variables[i][j][w])
-    return teamsVariables
+                if ((i == team1) and (j == team2)) or (
+                    (i == team2) and (j == team1)
+                ):
+                    teams_variables.append(variables[i][j][w])
+    return teams_variables
+
+
+# Backwards compatibility
+getTeamsVariablesForAllWeeks = get_team_variables_for_all_weeks
 
 
 def _get_schedule_data(variables, weeks_param, teams_param):
@@ -90,7 +103,9 @@ def generate_schedule(
     for week in weeks:
         for team in teams:
             constraint = solver.RowConstraint(2, 2, "")
-            for variable in getTeamsVariablesForWeek(variables, team, week, weeks, teams):
+            for variable in get_team_variables_for_week(
+                variables, team, week, weeks, teams
+            ):
                 constraint.SetCoefficient(variable, 1)
 
     # when team 1 plays team 2 in a given week, ensure team 2 plays team 1
@@ -114,7 +129,7 @@ def generate_schedule(
                     or (team >= num_teams / 2 and team2 >= num_teams / 2)
                 ):
                     constraint = solver.RowConstraint(4, 4, "")
-                    for variable in getTeamsVariablesForAllWeeks(
+                    for variable in get_team_variables_for_all_weeks(
                         variables, team, team2, weeks, teams
                     ):
                         constraint.SetCoefficient(variable, 1)
@@ -130,7 +145,7 @@ def generate_schedule(
                     or (team >= num_teams / 2 and team2 >= num_teams / 2)
                 ):
                     constraint = solver.RowConstraint(2, 2, "")
-                    for variable in getTeamsVariablesForAllWeeks(
+                    for variable in get_team_variables_for_all_weeks(
                         variables, team, team2, weeks, teams
                     ):
                         constraint.SetCoefficient(variable, 1)
