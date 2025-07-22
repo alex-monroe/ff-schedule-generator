@@ -20,6 +20,7 @@ def build_request(num_teams: int) -> scheduler_pb2.ScheduleRequest:
         )
     request.options.in_division_play_twice = True
     request.options.out_of_division_play_once = True
+    request.options.num_weeks = 13
     return request
 
 

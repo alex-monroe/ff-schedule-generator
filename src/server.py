@@ -25,12 +25,13 @@ def build_schedule_response(
     logger.info(
         (
             "GenerateSchedule request received with %d teams across %d divisions "
-            "(in_division_play_twice=%s, out_of_division_play_once=%s)"
+            "(in_division_play_twice=%s, out_of_division_play_once=%s, num_weeks=%d)"
         ),
         len(req.league),
         len({t.division_id for t in req.league} | {d.id for d in req.divisions}),
         req.options.in_division_play_twice,
         req.options.out_of_division_play_once,
+        req.options.num_weeks if req.options.num_weeks else 13,
     )
 
     response = scheduler_pb2.ScheduleResponse()
@@ -46,8 +47,10 @@ def build_schedule_response(
         logger.info("No teams provided in request")
         return response
 
+    num_weeks = req.options.num_weeks or 13
+
     schedule_data = schedule_generator.generate_schedule(
-        13,
+        num_weeks,
         num_teams,
         req.options.in_division_play_twice,
         req.options.out_of_division_play_once,
