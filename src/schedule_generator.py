@@ -48,7 +48,14 @@ def generate_schedule(
     out_of_division_play_once=False,
 ):
     logger.info(
-        "Generating schedule: %d weeks, %d teams", num_weeks, num_teams
+        (
+            "Generating schedule: %d weeks, %d teams "
+            "(in_division_play_twice=%s, out_of_division_play_once=%s)"
+        ),
+        num_weeks,
+        num_teams,
+        in_division_play_twice,
+        out_of_division_play_once,
     )
     weeks = range(num_weeks)
     teams = range(num_teams)
