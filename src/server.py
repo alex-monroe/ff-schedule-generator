@@ -44,8 +44,8 @@ def build_schedule_response(
     schedule_data = schedule_generator.generate_schedule(
         13,
         num_teams,
-        req.in_division_play_twice,
-        req.out_of_division_play_once,
+        req.options.in_division_play_twice,
+        req.options.out_of_division_play_once,
     )
 
     if isinstance(schedule_data, str):

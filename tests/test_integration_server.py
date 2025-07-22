@@ -123,8 +123,8 @@ class TestServerIntegration(unittest.TestCase):
         for i in range(5):
             request.league.append(scheduler_pb2.Team(name=f"Div1 Team {i+1}", division_id=1))
             request.league.append(scheduler_pb2.Team(name=f"Div0 Team {i+1}", division_id=0))
-        request.in_division_play_twice = True
-        request.out_of_division_play_once = True
+        request.options.in_division_play_twice = True
+        request.options.out_of_division_play_once = True
         url = "http://127.0.0.1:8080/generate-schedule"
         req_dict = json_format.MessageToDict(
             request, preserving_proto_field_name=True
@@ -173,8 +173,8 @@ class TestServerIntegration(unittest.TestCase):
             request.league.append(scheduler_pb2.Team(name=f"Div1 Team {i+1}", division_id=1))
         for i in range(3):
             request.league.append(scheduler_pb2.Team(name=f"Div2 Team {i+1}", division_id=2))
-        request.in_division_play_twice = True
-        request.out_of_division_play_once = True
+        request.options.in_division_play_twice = True
+        request.options.out_of_division_play_once = True
         url = "http://127.0.0.1:8080/generate-schedule"
         req_dict = json_format.MessageToDict(
             request, preserving_proto_field_name=True
@@ -199,8 +199,8 @@ class TestServerIntegration(unittest.TestCase):
         for i in range(4):
             request.league.append(scheduler_pb2.Team(name=f"Div0 Team {i+1}", division_id=0))
             request.league.append(scheduler_pb2.Team(name=f"Div1 Team {i+1}", division_id=1))
-        request.in_division_play_twice = True
-        request.out_of_division_play_once = True
+        request.options.in_division_play_twice = True
+        request.options.out_of_division_play_once = True
         url = "http://127.0.0.1:8080/generate-schedule"
         req_dict = json_format.MessageToDict(
             request, preserving_proto_field_name=True
