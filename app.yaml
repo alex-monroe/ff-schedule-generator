@@ -9,7 +9,7 @@ env_variables:
   PYTHONPATH: "/app"
 liveness_check:
   path: "/liveness_check"
-  check_interval_sec: 300
+  check_interval_sec: 30
 readiness_check:
   path: "/readiness_check"
-  check_interval_sec: 300
+  check_interval_sec: 30
