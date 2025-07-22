@@ -63,6 +63,20 @@ def _run_container() -> subprocess.Popen:
     ], cwd=ROOT_DIR)
 
 
+def _wait_for_server(timeout: int = 30) -> None:
+    """Block until the server in the container responds or timeout."""
+    url = "http://127.0.0.1:8080/liveness_check"
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        try:
+            with urllib.request.urlopen(url) as resp:
+                if resp.getcode() == 200:
+                    return
+        except Exception:  # pylint: disable=broad-except
+            time.sleep(1)
+    raise RuntimeError("Server did not become ready within timeout")
+
+
 class TestServerIntegration(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -81,8 +95,7 @@ class TestServerIntegration(unittest.TestCase):
         scheduler_pb2 = importlib.import_module("scheduler_pb2")
         logging.info("Launching HTTP server container for integration test")
         cls.proc = _run_container()
-        # give the server some time to start
-        time.sleep(1)
+        _wait_for_server()
         logging.info("Server container started")
 
     @classmethod
