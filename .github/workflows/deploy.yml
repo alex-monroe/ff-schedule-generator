@@ -32,10 +32,10 @@ jobs:
         run: echo "version=$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_ENV
 
       - name: Deploy to App Engine
-        uses: google-github-actions/deploy-appengine@v2
-        with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-          deliverables: app.yaml
-          version: ${{ env.version }}
-          promote: true
-          flags: --verbosity=debug
+        run: |
+          gcloud app deploy app.yaml \
+            --project ${{ secrets.GCP_PROJECT_ID }} \
+            --version ${{ env.version }} \
+            --promote \
+            --verbosity=debug \
+            --quiet
