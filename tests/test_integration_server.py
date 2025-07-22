@@ -175,6 +175,30 @@ class TestServerIntegration(unittest.TestCase):
         body = json.loads(cm.exception.read().decode())
         self.assertIn("error", body)
 
+    def test_generate_schedule_infeasible(self):
+        """Verify the server returns an error when the schedule cannot be generated."""
+        logging.info("Sending infeasible GenerateSchedule request to server")
+        request = scheduler_pb2.ScheduleRequest()
+        for i in range(4):
+            request.league.append(scheduler_pb2.Team(name=f"Div0 Team {i+1}", division_id=0))
+            request.league.append(scheduler_pb2.Team(name=f"Div1 Team {i+1}", division_id=1))
+        url = "http://127.0.0.1:8080/generate-schedule"
+        req_dict = json_format.MessageToDict(
+            request, preserving_proto_field_name=True
+        )
+        data = json.dumps(req_dict).encode()
+        http_req = urllib.request.Request(
+            url,
+            data=data,
+            headers={"Content-Type": "application/json"},
+        )
+        with self.assertRaises(urllib.error.HTTPError) as cm:
+            urllib.request.urlopen(http_req)
+
+        self.assertEqual(cm.exception.code, 400)
+        body = json.loads(cm.exception.read().decode())
+        self.assertIn("error", body)
+
 
 if __name__ == "__main__":
     logging.basicConfig(

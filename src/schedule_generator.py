@@ -1,4 +1,7 @@
+import logging
 from ortools.linear_solver import pywraplp
+
+logger = logging.getLogger(__name__)
 
 
 # Returns all of the variables in variables that correspond to the
@@ -39,12 +42,14 @@ def _get_schedule_data(variables, weeks_param, teams_param):
 
 
 def generate_schedule(num_weeks, num_teams):
+    logger.info("Generating schedule: %d weeks, %d teams", num_weeks, num_teams)
     weeks = range(num_weeks)
     teams = range(num_teams)
 
     # Create the mip solver with the SCIP backend.
     solver = pywraplp.Solver.CreateSolver("SAT")
     if not solver:
+        logger.error("Solver could not be created")
         return "Error: Solver could not be created."
 
     infinity = solver.infinity()
@@ -135,11 +140,14 @@ def generate_schedule(num_weeks, num_teams):
     objective.SetMaximization()
 
     status = solver.Solve()
+    logger.info("Solver finished with status %s", status)
 
     if status == pywraplp.Solver.OPTIMAL:
         schedule_data = _get_schedule_data(variables, weeks, teams)
+        logger.info("Generated schedule with %d matchups", len(schedule_data) - 1)
         return schedule_data
     else:
+        logger.error("The problem does not have an optimal solution.")
         return "The problem does not have an optimal solution."
 
 

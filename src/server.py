@@ -13,7 +13,11 @@ app = Flask(__name__)
 def build_schedule_response(
     req: scheduler_pb2.ScheduleRequest,
 ) -> scheduler_pb2.ScheduleResponse:
-    logger.info("GenerateSchedule request received with %d teams", len(req.league))
+    logger.info(
+        "GenerateSchedule request received with %d teams across %d divisions",
+        len(req.league),
+        len({t.division_id for t in req.league} | {d.id for d in req.divisions}),
+    )
 
     response = scheduler_pb2.ScheduleResponse()
 
@@ -32,7 +36,7 @@ def build_schedule_response(
 
     if isinstance(schedule_data, str):
         logger.error("Schedule generation failed: %s", schedule_data)
-        return response
+        raise ValueError(schedule_data)
 
     schedule = {}
     for week_str, team1_idx, team2_idx in schedule_data[1:]:
@@ -66,12 +70,14 @@ def health_check() -> tuple[str, int]:
 @app.post("/generate-schedule")
 def generate_schedule_http():
     req_json = request.get_json(force=True)
+    logger.debug("/generate-schedule body: %s", req_json)
     req_pb = json_format.ParseDict(req_json, scheduler_pb2.ScheduleRequest())
     try:
         resp_pb = build_schedule_response(req_pb)
         resp_dict = json_format.MessageToDict(
             resp_pb, preserving_proto_field_name=True
         )
+        logger.debug("Returning response with %d weeks", len(resp_pb.matchups))
         return jsonify(resp_dict), 200
     except ValueError as exc:
         return jsonify({"error": str(exc)}), 400

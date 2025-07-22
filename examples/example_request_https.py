@@ -2,6 +2,7 @@ import argparse
 import json
 import sys
 import urllib.request
+import urllib.error
 
 from google.protobuf import json_format
 
@@ -20,12 +21,12 @@ def build_request(num_teams: int) -> scheduler_pb2.ScheduleRequest:
     return request
 
 
-def main(url: str = "https://ff-scheduler-466320.uw.r.appspot.com") -> None:
-    """Send a request to the deployed server and verify the response."""
+def request_and_check(url: str, num_teams: int) -> None:
+    """Request a schedule and perform basic sanity checks."""
 
     url = url.rstrip("/") + "/generate-schedule"
 
-    request = build_request(10)
+    request = build_request(num_teams)
     req_dict = json_format.MessageToDict(
         request, preserving_proto_field_name=True
     )
@@ -46,13 +47,24 @@ def main(url: str = "https://ff-scheduler-466320.uw.r.appspot.com") -> None:
             f"Expected 13 weeks of matchups, got {len(response.matchups)}"
         )
     for weekly in response.matchups:
-        if len(weekly.matchups) != 5:
+        if len(weekly.matchups) != num_teams // 2:
             raise AssertionError(
-                "Each week should contain 5 matchups, "
+                "Each week should contain the expected number of matchups, "
                 f"got {len(weekly.matchups)}"
             )
 
-    print("Server returned expected schedule")
+    print(f"Server returned schedule for {num_teams} teams")
+
+
+def main(url: str = "https://ff-scheduler-466320.uw.r.appspot.com", teams: str = "10") -> None:
+    """Send requests to the deployed server and verify the responses."""
+
+    for num in [int(t) for t in teams.split(",")]:
+        try:
+            request_and_check(url, num)
+        except urllib.error.HTTPError as exc:
+            body = exc.read().decode()
+            print(f"Request for {num} teams failed: {body}")
 
 
 if __name__ == "__main__":
@@ -65,9 +77,14 @@ if __name__ == "__main__":
         default="https://ff-scheduler-466320.uw.r.appspot.com",
         help="Base URL of the schedule service",
     )
+    parser.add_argument(
+        "--teams",
+        default="10",
+        help="Comma separated list of team counts to request",
+    )
     args = parser.parse_args()
     try:
-        main(args.url)
+        main(args.url, args.teams)
     except Exception as exc:  # pylint: disable=broad-except
         print(f"Test failed: {exc}", file=sys.stderr)
         sys.exit(1)
