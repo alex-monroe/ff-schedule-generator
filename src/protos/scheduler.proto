@@ -8,6 +8,12 @@ service Scheduler {
 message ScheduleRequest {
     repeated Team league = 1;
     repeated Division divisions = 2;
+    Options options = 3;
+}
+
+message Options {
+    bool in_division_play_twice = 1;
+    bool out_of_division_play_once = 2;
 }
 
 message Team {

@@ -122,7 +122,9 @@ class TestScheduleGenerator(unittest.TestCase):
                 [1, 0, 1],
                 [1, 1, 0],
             ]
-            result = schedule_generator.generate_schedule(2, 2)
+            result = schedule_generator.generate_schedule(
+                2, 2, True, True
+            )
 
         expected = [["Week", "Team1", "Team2"], [0, 0, 1], [0, 1, 0], [1, 0, 1], [1, 1, 0]]
         self.assertEqual(result, expected)
@@ -135,14 +137,14 @@ class TestScheduleGenerator(unittest.TestCase):
         # Mock solver behavior for no optimal solution
         mock_solver_instance.Solve.return_value = schedule_generator.pywraplp.Solver.INFEASIBLE
 
-        result = schedule_generator.generate_schedule(2, 2)
+        result = schedule_generator.generate_schedule(2, 2, True, True)
         self.assertEqual(result, "The problem does not have an optimal solution.")
 
     @patch("src.schedule_generator.pywraplp.Solver")
     def test_generate_schedule_solver_creation_failure(self, MockSolver):
         MockSolver.CreateSolver.return_value = None
 
-        result = schedule_generator.generate_schedule(2, 2)
+        result = schedule_generator.generate_schedule(2, 2, True, True)
         self.assertEqual(result, "Error: Solver could not be created.")
 
 

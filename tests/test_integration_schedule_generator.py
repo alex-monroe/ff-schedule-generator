@@ -20,7 +20,12 @@ class TestScheduleGeneratorIntegration(unittest.TestCase):
             cls.num_teams,
         )
 
-        cls.schedule_data = schedule_generator.generate_schedule(cls.num_weeks, cls.num_teams)
+        cls.schedule_data = schedule_generator.generate_schedule(
+            cls.num_weeks,
+            cls.num_teams,
+            True,
+            True,
+        )
 
         logging.info("generate_schedule returned %d rows", len(cls.schedule_data))
 

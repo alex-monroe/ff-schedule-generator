@@ -23,9 +23,14 @@ def build_schedule_response(
     req: scheduler_pb2.ScheduleRequest,
 ) -> scheduler_pb2.ScheduleResponse:
     logger.info(
-        "GenerateSchedule request received with %d teams across %d divisions",
+        (
+            "GenerateSchedule request received with %d teams across %d divisions "
+            "(in_division_play_twice=%s, out_of_division_play_once=%s)"
+        ),
         len(req.league),
         len({t.division_id for t in req.league} | {d.id for d in req.divisions}),
+        req.options.in_division_play_twice,
+        req.options.out_of_division_play_once,
     )
 
     response = scheduler_pb2.ScheduleResponse()
@@ -41,7 +46,12 @@ def build_schedule_response(
         logger.info("No teams provided in request")
         return response
 
-    schedule_data = schedule_generator.generate_schedule(13, num_teams)
+    schedule_data = schedule_generator.generate_schedule(
+        13,
+        num_teams,
+        req.options.in_division_play_twice,
+        req.options.out_of_division_play_once,
+    )
 
     if isinstance(schedule_data, str):
         logger.error("Schedule generation failed: %s", schedule_data)
