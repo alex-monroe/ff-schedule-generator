@@ -44,7 +44,7 @@ def request_and_print(url: str, num_teams: int) -> None:
     print()
 
 
-def main(url: str = "https://ff-scheduler-466320.uw.r.appspot.com", teams: str = "10,8,12") -> None:
+def main(url: str = "http://127.0.0.1:8080", teams: str = "10,8,12") -> None:
     """Send example schedule requests to the HTTP server."""
 
     for teams in [int(t) for t in teams.split(",")]:
@@ -62,7 +62,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "url",
         nargs="?",
-        default="https://ff-scheduler-466320.uw.r.appspot.com",
+        default="http://127.0.0.1:8080",
         help="Base URL of the schedule service",
     )
     parser.add_argument(
