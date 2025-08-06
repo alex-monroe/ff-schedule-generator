@@ -28,17 +28,18 @@ jobs:
           pip install grpcio-tools
       - name: Compile protos
         run: python compile_protos.py
-      - name: Run example request
+      - name: Run smoke test request
         id: run-example
         env:
           EXAMPLE_REQUEST_URL: https://ff-schedule-generator.onrender.com
         run: |
-          schedule=$(PYTHONPATH=.:src python examples/example_request_https.py "$EXAMPLE_REQUEST_URL")
-          if [ -z "$schedule" ]; then
+          output=$(PYTHONPATH=.:src python examples/smoke_test_request.py "$EXAMPLE_REQUEST_URL")
+          if [ -z "$output" ]; then
             echo "No schedule returned" >&2
             exit 1
           fi
-          echo "$schedule"
+          echo "$output"
+          schedule=$(echo "$output" | tail -n1)
           {
             echo 'schedule<<EOF'
             echo "$schedule"
