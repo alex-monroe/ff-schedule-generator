@@ -39,4 +39,8 @@ jobs:
             exit 1
           fi
           echo "$schedule"
-          echo "schedule=$schedule" >> "$GITHUB_OUTPUT"
+          {
+            echo 'schedule<<EOF'
+            echo "$schedule"
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"

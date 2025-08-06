@@ -63,16 +63,24 @@ def request_and_check(url: str, num_teams: int) -> dict:
 
 
 def main(url: str = "http://127.0.0.1:8080", teams: str = "10") -> None:
-    """Send requests to the schedule server and verify the responses."""
+    """Send requests to the schedule server and verify the responses.
 
+    Outputs a single JSON object mapping the requested team counts to their
+    respective schedules. This ensures that consumers of the script's output,
+    such as GitHub Actions workflows, can handle multiple schedules without
+    losing data when capturing command output.
+    """
+
+    results = {}
     for num in [int(t) for t in teams.split(",")]:
         try:
-            resp_data = request_and_check(url, num)
-            print(json.dumps(resp_data))
+            results[str(num)] = request_and_check(url, num)
         except urllib.error.HTTPError as exc:
             body = exc.read().decode()
             print(f"Request for {num} teams failed: {body}", file=sys.stderr)
             raise
+
+    print(json.dumps(results))
 
 
 if __name__ == "__main__":
