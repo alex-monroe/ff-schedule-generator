@@ -13,6 +13,8 @@ jobs:
   run-example:
     runs-on: ubuntu-latest
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    outputs:
+      schedule: ${{ steps.run-example.outputs.schedule }}
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -27,6 +29,14 @@ jobs:
       - name: Compile protos
         run: python compile_protos.py
       - name: Run example request
+        id: run-example
         env:
           EXAMPLE_REQUEST_URL: https://ff-schedule-generator.onrender.com
-        run: PYTHONPATH=.:src python examples/example_request_https.py $EXAMPLE_REQUEST_URL
+        run: |
+          schedule=$(PYTHONPATH=.:src python examples/example_request_https.py "$EXAMPLE_REQUEST_URL")
+          if [ -z "$schedule" ]; then
+            echo "No schedule returned" >&2
+            exit 1
+          fi
+          echo "$schedule"
+          echo "schedule=$schedule" >> "$GITHUB_OUTPUT"

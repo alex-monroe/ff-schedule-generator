@@ -24,8 +24,11 @@ def build_request(num_teams: int) -> scheduler_pb2.ScheduleRequest:
     return request
 
 
-def request_and_check(url: str, num_teams: int) -> None:
-    """Request a schedule and perform basic sanity checks."""
+def request_and_check(url: str, num_teams: int) -> dict:
+    """Request a schedule and perform basic sanity checks.
+
+    Returns the raw response payload as a dictionary.
+    """
 
     url = url.rstrip("/") + "/generate-schedule"
 
@@ -56,7 +59,7 @@ def request_and_check(url: str, num_teams: int) -> None:
                 f"got {len(weekly.matchups)}"
             )
 
-    print(f"Server returned schedule for {num_teams} teams")
+    return resp_data
 
 
 def main(url: str = "http://127.0.0.1:8080", teams: str = "10") -> None:
@@ -64,10 +67,12 @@ def main(url: str = "http://127.0.0.1:8080", teams: str = "10") -> None:
 
     for num in [int(t) for t in teams.split(",")]:
         try:
-            request_and_check(url, num)
+            resp_data = request_and_check(url, num)
+            print(json.dumps(resp_data))
         except urllib.error.HTTPError as exc:
             body = exc.read().decode()
-            print(f"Request for {num} teams failed: {body}")
+            print(f"Request for {num} teams failed: {body}", file=sys.stderr)
+            raise
 
 
 if __name__ == "__main__":
