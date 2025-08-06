@@ -27,3 +27,12 @@ jobs:
           context: .
           push: true
           tags: ghcr.io/${{ github.repository }}:latest,ghcr.io/${{ github.repository }}:${{ github.sha }}
+
+      - name: Display published image
+        id: image
+        run: |
+          IMAGE="ghcr.io/${{ github.repository }}:${{ github.sha }}"
+          echo "Docker image published: $IMAGE"
+          echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
+          echo "::notice title=Published image::$IMAGE"
+          echo "### Docker Image\n\n\`$IMAGE\`" >> "$GITHUB_STEP_SUMMARY"
