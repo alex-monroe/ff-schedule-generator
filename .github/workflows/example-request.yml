@@ -15,6 +15,7 @@ jobs:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     outputs:
       schedule: ${{ steps.run-example.outputs.schedule }}
+      duration: ${{ steps.run-example.outputs.duration }}
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -39,9 +40,20 @@ jobs:
             exit 1
           fi
           echo "$output"
+          duration=$(echo "$output" | head -n1 | awk '{print $4}' | tr -d 's')
           schedule=$(echo "$output" | tail -n1)
           {
             echo 'schedule<<EOF'
             echo "$schedule"
             echo 'EOF'
+            echo "duration=$duration"
           } >> "$GITHUB_OUTPUT"
+          {
+            echo '### Smoke test request'
+            echo
+            echo "Request duration: ${duration}s"
+            echo
+            echo '```json'
+            echo "$schedule"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
