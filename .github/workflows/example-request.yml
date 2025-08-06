@@ -15,6 +15,7 @@ jobs:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     outputs:
       schedule: ${{ steps.run-example.outputs.schedule }}
+      duration: ${{ steps.run-example.outputs.duration }}
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -28,19 +29,31 @@ jobs:
           pip install grpcio-tools
       - name: Compile protos
         run: python compile_protos.py
-      - name: Run example request
+      - name: Run smoke test request
         id: run-example
         env:
           EXAMPLE_REQUEST_URL: https://ff-schedule-generator.onrender.com
         run: |
-          schedule=$(PYTHONPATH=.:src python examples/example_request_https.py "$EXAMPLE_REQUEST_URL")
-          if [ -z "$schedule" ]; then
+          output=$(PYTHONPATH=.:src python examples/smoke_test_request.py "$EXAMPLE_REQUEST_URL")
+          if [ -z "$output" ]; then
             echo "No schedule returned" >&2
             exit 1
           fi
-          echo "$schedule"
+          echo "$output"
+          duration=$(echo "$output" | head -n1 | awk '{print $4}' | tr -d 's')
+          schedule=$(echo "$output" | tail -n1)
           {
             echo 'schedule<<EOF'
             echo "$schedule"
             echo 'EOF'
+            echo "duration=$duration"
           } >> "$GITHUB_OUTPUT"
+          {
+            echo '### Smoke test request'
+            echo
+            echo "Request duration: ${duration}s"
+            echo
+            echo '```json'
+            echo "$schedule"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
