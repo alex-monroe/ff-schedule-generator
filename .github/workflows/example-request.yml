@@ -28,5 +28,5 @@ jobs:
         run: python compile_protos.py
       - name: Run example request
         env:
-          EXAMPLE_REQUEST_URL: https://ff-scheduler-466320.uw.r.appspot.com
+          EXAMPLE_REQUEST_URL: https://ff-schedule-generator.onrender.com
         run: PYTHONPATH=.:src python examples/example_request_https.py $EXAMPLE_REQUEST_URL
