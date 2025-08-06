@@ -32,7 +32,7 @@ To run the HTTP server, use the following command:
 nox -s run
 ```
 
-The server listens on port `8080` and exposes health endpoints used by GCP App Engine:
+The server listens on port `8080` and exposes health endpoints:
 
 * `/liveness_check`
 * `/readiness_check`
@@ -41,8 +41,7 @@ Both endpoints return `200 OK` with the body `"ok"`.
 
 Cross-Origin Resource Sharing (CORS) is enabled so browser-based clients can
 request schedules from trusted domains. Requests originating from `*.vercel.app`
-(including any paths under those subdomains) or any domain containing `google`
-or `gcp` are allowed.
+(including any paths under those subdomains) are allowed.
 
 ## Example Request
 
@@ -64,7 +63,7 @@ for i in range(10):
 req_dict = json_format.MessageToDict(request, preserving_proto_field_name=True)
 data = json.dumps(req_dict).encode()
 http_req = urllib.request.Request(
-    'https://ff-scheduler-466320.uw.r.appspot.com/generate-schedule',
+    'http://127.0.0.1:8080/generate-schedule',
     data=data,
     headers={'Content-Type': 'application/json'}
 )
@@ -78,7 +77,7 @@ Ensure the protobuf files are built (`nox -s build`) so that `scheduler_pb2` is
 available before running the snippet.
 
 You can also run the example script in `examples/example_request.py` to see the
-same request in action against the hosted API:
+same request in action against the server:
 
 ```bash
 nox -s build
@@ -99,6 +98,3 @@ docker run -p 8080:8080 schedule-server
 The image compiles the protobuf definitions during build and starts the HTTP server on port `8080`.
 The `compile_protos.py` script is copied into the image so that any new `.proto` files will be included automatically.
 
-## Deployment Smoke Test
-
-A GitHub Actions workflow runs `examples/example_request_https.py` after each deployment and once a day to verify that the production server responds correctly. The script sends a simple schedule request and checks that the response contains 13 weeks with five matchups per week.

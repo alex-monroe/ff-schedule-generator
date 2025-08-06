@@ -12,9 +12,7 @@ app = Flask(__name__)
 # Allow cross-origin requests only from trusted domains.
 TRUSTED_ORIGINS = [
     # Allow all subdomains of vercel.app and any paths beneath them.
-    r".*\.vercel\.app.*",
-    r".*google.*",
-    r".*gcp.*",
+    r".*\.vercel\.app.*"
 ]
 CORS(app, origins=TRUSTED_ORIGINS)
 
@@ -82,9 +80,7 @@ def root() -> tuple[str, int]:
 
 
 @app.get("/liveness_check")
-@app.get("/_ah/liveness_check")
 @app.get("/readiness_check")
-@app.get("/_ah/readiness_check")
 def health_check() -> tuple[str, int]:
     return "ok", 200
 

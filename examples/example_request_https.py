@@ -59,8 +59,8 @@ def request_and_check(url: str, num_teams: int) -> None:
     print(f"Server returned schedule for {num_teams} teams")
 
 
-def main(url: str = "https://ff-scheduler-466320.uw.r.appspot.com", teams: str = "10") -> None:
-    """Send requests to the deployed server and verify the responses."""
+def main(url: str = "http://127.0.0.1:8080", teams: str = "10") -> None:
+    """Send requests to the schedule server and verify the responses."""
 
     for num in [int(t) for t in teams.split(",")]:
         try:
@@ -72,12 +72,12 @@ def main(url: str = "https://ff-scheduler-466320.uw.r.appspot.com", teams: str =
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Send an example ScheduleRequest to the HTTPS service"
+        description="Send an example ScheduleRequest to the service"
     )
     parser.add_argument(
         "url",
         nargs="?",
-        default="https://ff-scheduler-466320.uw.r.appspot.com",
+        default="http://127.0.0.1:8080",
         help="Base URL of the schedule service",
     )
     parser.add_argument(
