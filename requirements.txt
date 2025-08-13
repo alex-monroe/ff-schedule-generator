@@ -3,6 +3,7 @@ grpcio==1.73.1
 grpcio-tools==1.73.1
 grpcio-reflection==1.73.1
 Flask==3.0.3
+flask-cors==6.0.1
+gunicorn==22.0.0
 flake8==7.0.0
 black==24.4.2
-flask-cors==6.0.1

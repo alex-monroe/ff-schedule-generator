@@ -18,4 +18,4 @@ ENV PYTHONPATH=/app
 
 EXPOSE 8080
 
-CMD ["python", "src/server.py"]
+CMD ["gunicorn", "src.server:app", "--bind", "0.0.0.0:8080"]
