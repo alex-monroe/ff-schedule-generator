@@ -12,8 +12,10 @@ def run(session):
     session.install("-r", "requirements.txt")
     session.run("python", "compile_protos.py")
     session.run(
-        "python",
-        "src/server.py",
+        "gunicorn",
+        "src.server:app",
+        "--bind",
+        "0.0.0.0:8080",
         env={"PYTHONPATH": "."},
     )
 

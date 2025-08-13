@@ -26,13 +26,21 @@ This will create the generated `_pb2.py` files next to your source code. You can
 
 ## Running the Server
 
-To run the HTTP server, use the following command:
+For production-style runs the application is served by Gunicorn. Start it
+directly with:
+
+```bash
+gunicorn src.server:app -b 0.0.0.0:8080
+```
+
+The `serve()` helper in `src/server.py` still uses Flask's built-in
+development server for quick local testing and is invoked by:
 
 ```bash
 nox -s run
 ```
 
-The server listens on port `8080` and exposes health endpoints:
+Both methods listen on port `8080` and expose health endpoints:
 
 * `/liveness_check`
 * `/readiness_check`
@@ -95,6 +103,7 @@ docker build -t schedule-server .
 docker run -p 8080:8080 schedule-server
 ```
 
-The image compiles the protobuf definitions during build and starts the HTTP server on port `8080`.
-The `compile_protos.py` script is copied into the image so that any new `.proto` files will be included automatically.
+The image compiles the protobuf definitions during build and serves the app via
+Gunicorn on port `8080`. The `compile_protos.py` script is copied into the image
+so that any new `.proto` files will be included automatically.
 
