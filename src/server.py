@@ -7,6 +7,11 @@ from google.protobuf import json_format
 import src.scheduler_pb2 as scheduler_pb2
 from src import schedule_generator
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="[%(asctime)s] %(levelname)s %(name)s: %(message)s",
+    force=True,
+)
 logger = logging.getLogger(__name__)
 app = Flask(__name__)
 # Allow cross-origin requests only from trusted domains.
@@ -103,10 +108,6 @@ def generate_schedule_http():
 
 def serve() -> None:
     """Run the built-in development server."""
-    logging.basicConfig(
-        level=logging.INFO,
-        format="[%(asctime)s] %(levelname)s %(name)s: %(message)s",
-    )
     app.run(host="0.0.0.0", port=8080)
 
 
