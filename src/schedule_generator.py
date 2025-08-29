@@ -70,6 +70,10 @@ def generate_schedule(
         in_division_play_twice,
         out_of_division_play_once,
     )
+    if not 1 <= num_weeks <= 20:
+        raise ValueError("num_weeks must be between 1 and 20")
+    if num_teams > 32:
+        raise ValueError("num_teams must be 32 or less")
     weeks = range(num_weeks)
     teams = range(num_teams)
 

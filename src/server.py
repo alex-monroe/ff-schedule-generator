@@ -49,8 +49,12 @@ def build_schedule_response(
     if num_teams == 0:
         logger.info("No teams provided in request")
         return response
+    if num_teams > 32:
+        raise ValueError("Number of teams must be 32 or less")
 
     num_weeks = req.options.num_weeks or 13
+    if not 1 <= num_weeks <= 20:
+        raise ValueError("num_weeks must be between 1 and 20")
 
     schedule_data = schedule_generator.generate_schedule(
         num_weeks,
