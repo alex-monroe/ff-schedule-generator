@@ -221,6 +221,56 @@ class TestServerIntegration(unittest.TestCase):
         body = json.loads(cm.exception.read().decode())
         self.assertIn("error", body)
 
+    def test_generate_schedule_invalid_num_weeks(self):
+        """Requests with invalid num_weeks should return an error."""
+        logging.info("Sending GenerateSchedule request with invalid num_weeks to server")
+        request = scheduler_pb2.ScheduleRequest()
+        for i in range(5):
+            request.league.append(scheduler_pb2.Team(name=f"Div1 Team {i+1}", division_id=1))
+            request.league.append(scheduler_pb2.Team(name=f"Div0 Team {i+1}", division_id=0))
+        request.options.in_division_play_twice = True
+        request.options.out_of_division_play_once = True
+        request.options.num_weeks = 21
+        url = "http://127.0.0.1:8080/generate-schedule"
+        req_dict = json_format.MessageToDict(
+            request, preserving_proto_field_name=True
+        )
+        data = json.dumps(req_dict).encode()
+        http_req = urllib.request.Request(
+            url, data=data, headers={"Content-Type": "application/json"}
+        )
+        with self.assertRaises(urllib.error.HTTPError) as cm:
+            urllib.request.urlopen(http_req)
+
+        self.assertEqual(cm.exception.code, 400)
+        body = json.loads(cm.exception.read().decode())
+        self.assertIn("error", body)
+
+    def test_generate_schedule_too_many_teams(self):
+        """Requests with more than 32 teams should return an error."""
+        logging.info("Sending GenerateSchedule request with too many teams to server")
+        request = scheduler_pb2.ScheduleRequest()
+        for i in range(17):
+            request.league.append(scheduler_pb2.Team(name=f"Div0 Team {i+1}", division_id=0))
+            request.league.append(scheduler_pb2.Team(name=f"Div1 Team {i+1}", division_id=1))
+        request.options.in_division_play_twice = True
+        request.options.out_of_division_play_once = True
+        request.options.num_weeks = 13
+        url = "http://127.0.0.1:8080/generate-schedule"
+        req_dict = json_format.MessageToDict(
+            request, preserving_proto_field_name=True
+        )
+        data = json.dumps(req_dict).encode()
+        http_req = urllib.request.Request(
+            url, data=data, headers={"Content-Type": "application/json"}
+        )
+        with self.assertRaises(urllib.error.HTTPError) as cm:
+            urllib.request.urlopen(http_req)
+
+        self.assertEqual(cm.exception.code, 400)
+        body = json.loads(cm.exception.read().decode())
+        self.assertIn("error", body)
+
 
 if __name__ == "__main__":
     logging.basicConfig(

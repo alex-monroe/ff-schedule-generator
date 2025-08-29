@@ -147,6 +147,16 @@ class TestScheduleGenerator(unittest.TestCase):
         result = schedule_generator.generate_schedule(2, 2, True, True)
         self.assertEqual(result, "Error: Solver could not be created.")
 
+    def test_generate_schedule_invalid_num_weeks(self):
+        with self.assertRaises(ValueError):
+            schedule_generator.generate_schedule(0, 2)
+        with self.assertRaises(ValueError):
+            schedule_generator.generate_schedule(21, 2)
+
+    def test_generate_schedule_too_many_teams(self):
+        with self.assertRaises(ValueError):
+            schedule_generator.generate_schedule(13, 33)
+
 
 if __name__ == "__main__":
     unittest.main()
