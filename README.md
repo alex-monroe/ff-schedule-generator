@@ -22,7 +22,10 @@ file found in that directory.
 nox -s build
 ```
 
-This will create the generated `_pb2.py` files next to your source code. You can also run `python compile_protos.py` directly if you prefer not to use Nox.
+This will create the generated `_pb2.py` files next to your source code. You can
+also run `python compile_protos.py` directly if you prefer not to use Nox. The
+script exposes a `main()` function, so it can be imported and called from other
+Python code as `compile_protos.main()`.
 
 ## Running the Server
 
